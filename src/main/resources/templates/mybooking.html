@@ -1,0 +1,1999 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VELOCE — My Bookings</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,700;1,300&family=Space+Mono:wght@400;700&display=swap');
+
+        :root {
+            --black: #0a0a0a;
+            --dark: #111111;
+            --card: #181818;
+            --border: #2a2a2a;
+            --red: #e63030;
+            --red-glow: #e6303055;
+            --gold: #c9a84c;
+            --white: #f5f5f0;
+            --gray: #888888;
+            --light: #cccccc;
+            --success: #2ecc71;
+            --warning: #f39c12;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: var(--black);
+            color: var(--white);
+            font-family: 'DM Sans', sans-serif;
+            min-height: 100vh;
+            transition: background .3s, color .3s;
+        }
+
+        body.light {
+            --black: #f0f0eb;
+            --dark: #e8e8e3;
+            --card: #ffffff;
+            --border: #dcdcd7;
+            --white: #111111;
+            --gray: #666666;
+            --light: #444444;
+        }
+
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--dark);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--red);
+            border-radius: 2px;
+        }
+
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 99999;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 48px;
+            height: 70px;
+            background: rgba(10, 10, 10, 0.98);
+            border-bottom: 1px solid var(--border);
+            backdrop-filter: blur(12px);
+            gap: 16px;
+        }
+
+        body.light header {
+            background: rgba(240, 240, 235, 0.98);
+        }
+
+        .logo {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 2rem;
+            letter-spacing: 6px;
+            color: var(--white);
+            text-decoration: none;
+        }
+
+        .logo span {
+            color: var(--red);
+        }
+
+        nav {
+            display: flex;
+            gap: 6px;
+            flex: 1;
+            justify-content: center;
+        }
+
+        nav a {
+            color: var(--gray);
+            font-family: 'DM Sans', sans-serif;
+            font-size: .82rem;
+            font-weight: 500;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            padding: 7px 14px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all .2s;
+            text-decoration: none;
+        }
+
+        nav a:hover {
+            color: var(--white);
+            background: var(--border);
+        }
+
+        nav a.active {
+            color: var(--red);
+            background: var(--border);
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .theme-btn {
+            background: none;
+            border: 1px solid var(--border);
+            color: var(--gray);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all .2s;
+        }
+
+        .theme-btn:hover {
+            border-color: var(--red);
+            color: var(--white);
+        }
+
+        .profile-circle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--red), #a00);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Space Mono', monospace;
+            font-size: .75rem;
+            font-weight: 700;
+            color: white;
+            cursor: pointer;
+            border: 2px solid var(--border);
+            position: relative;
+            transition: all .2s;
+            flex-shrink: 0;
+        }
+
+        .profile-circle:hover {
+            border-color: var(--red);
+            box-shadow: 0 0 16px var(--red-glow);
+        }
+
+        .profile-online {
+            position: absolute;
+            bottom: 1px;
+            right: 1px;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--success);
+            border: 2px solid var(--black);
+        }
+
+        main {
+            padding-top: 70px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 4px;
+            font-family: 'DM Sans', sans-serif;
+            font-weight: 700;
+            font-size: .78rem;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all .2s;
+            border: none;
+        }
+
+        .btn-red {
+            background: var(--red);
+            color: white;
+        }
+
+        .btn-red:hover {
+            background: #ff4040;
+            box-shadow: 0 0 16px var(--red-glow);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--white);
+            border: 1px solid var(--border);
+        }
+
+        .btn-outline:hover {
+            border-color: var(--red);
+            color: var(--red);
+        }
+
+        .btn-sm {
+            padding: 6px 14px;
+            font-size: .7rem;
+        }
+
+        .btn:disabled {
+            opacity: .4;
+            cursor: not-allowed;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: baseline;
+            gap: 16px;
+            margin-bottom: 28px;
+        }
+
+        .section-header h2 {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 2.8rem;
+            letter-spacing: 3px;
+            color: var(--white);
+        }
+
+        .section-header span {
+            font-family: 'Space Mono', monospace;
+            font-size: .72rem;
+            color: var(--red);
+            letter-spacing: 3px;
+            text-transform: uppercase;
+        }
+
+        /* STATS */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .stat-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            transition: border-color .2s;
+        }
+
+        .stat-card:hover {
+            border-color: var(--red);
+        }
+
+        .stat-num {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 2.8rem;
+            color: var(--red);
+            line-height: 1;
+        }
+
+        .stat-lbl {
+            font-size: .75rem;
+            color: var(--gray);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-top: 6px;
+        }
+
+        /* SEARCH & FILTER BAR */
+        .booking-toolbar {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 28px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .booking-search {
+            flex: 1;
+            min-width: 200px;
+            position: relative;
+        }
+
+        .booking-search input {
+            width: 100%;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--white);
+            font-family: 'DM Sans', sans-serif;
+            font-size: .9rem;
+            padding: 11px 40px 11px 16px;
+            outline: none;
+            transition: border-color .2s;
+        }
+
+        .booking-search input:focus {
+            border-color: var(--red);
+        }
+
+        .booking-search input::placeholder {
+            color: var(--gray);
+        }
+
+        .booking-search .s-icon {
+            position: absolute;
+            right: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--gray);
+        }
+
+        .filter-chip {
+            padding: 7px 16px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            background: transparent;
+            color: var(--gray);
+            font-family: 'DM Sans', sans-serif;
+            font-size: .8rem;
+            cursor: pointer;
+            transition: all .2s;
+        }
+
+        .filter-chip:hover,
+        .filter-chip.active {
+            border-color: var(--red);
+            color: var(--red);
+            background: rgba(230, 48, 48, .08);
+        }
+
+        /* BOOKING CARDS */
+        .booking-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .booking-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: border-color .2s;
+        }
+
+        .booking-card:hover {
+            border-color: #333;
+        }
+
+        .booking-card.cancelled {
+            opacity: .65;
+        }
+
+        .booking-card-inner {
+            display: flex;
+            gap: 0;
+        }
+
+        .booking-car-img {
+            width: 160px;
+            flex-shrink: 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .booking-car-img img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .booking-car-img .img-fallback {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3.5rem;
+            background: linear-gradient(135deg, #1a1a1a, #222);
+        }
+
+        .booking-body {
+            flex: 1;
+            padding: 18px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .booking-top {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .booking-car-name {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--white);
+        }
+
+        .booking-car-sub {
+            font-size: .78rem;
+            color: var(--gray);
+            margin-top: 2px;
+        }
+
+        .booking-status {
+            font-family: 'Space Mono', monospace;
+            font-size: .62rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            padding: 5px 12px;
+            border-radius: 3px;
+            white-space: nowrap;
+        }
+
+        .status-upcoming {
+            background: rgba(201, 168, 76, .12);
+            color: var(--gold);
+        }
+
+        .status-active {
+            background: rgba(46, 204, 113, .12);
+            color: var(--success);
+        }
+
+        .status-completed {
+            background: rgba(136, 136, 136, .12);
+            color: var(--gray);
+        }
+
+        .status-cancelled {
+            background: rgba(230, 48, 48, .1);
+            color: var(--red);
+        }
+
+        .booking-meta {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .booking-meta-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: .8rem;
+            color: var(--gray);
+        }
+
+        .booking-meta-item span:last-child {
+            color: var(--light);
+        }
+
+        .booking-ref {
+            font-family: 'Space Mono', monospace;
+            font-size: .7rem;
+            color: var(--gray);
+        }
+
+        .booking-ref strong {
+            color: var(--white);
+        }
+
+        .booking-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 4px;
+        }
+
+        .booking-price-big {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.8rem;
+            color: var(--gold);
+            margin-left: auto;
+        }
+
+        /* CONFIRM DIALOG */
+        .confirm-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 400;
+            background: rgba(0, 0, 0, .8);
+            backdrop-filter: blur(6px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity .2s;
+        }
+
+        .confirm-overlay.open {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .confirm-box {
+            background: var(--dark);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 32px;
+            width: 380px;
+            max-width: 92vw;
+            text-align: center;
+            transform: scale(.95);
+            transition: transform .2s;
+        }
+
+        .confirm-overlay.open .confirm-box {
+            transform: scale(1);
+        }
+
+        .confirm-icon {
+            font-size: 3rem;
+            margin-bottom: 14px;
+        }
+
+        .confirm-title {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.8rem;
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+        }
+
+        .confirm-msg {
+            font-size: .88rem;
+            color: var(--gray);
+            line-height: 1.6;
+            margin-bottom: 24px;
+        }
+
+        .confirm-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        /* RECEIPT MODAL */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 200;
+            background: rgba(0, 0, 0, .85);
+            backdrop-filter: blur(8px);
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay.open {
+            display: flex;
+            animation: fadeIn .2s ease;
+        }
+
+        .modal {
+            background: var(--dark);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            width: 520px;
+            max-width: 95vw;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            padding: 24px 28px 18px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 24px;
+        }
+
+        .modal-header h3 {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.7rem;
+            letter-spacing: 2px;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--gray);
+            font-size: 1.4rem;
+            cursor: pointer;
+            transition: color .2s;
+            padding: 4px;
+        }
+
+        .modal-close:hover {
+            color: var(--red);
+        }
+
+        .modal-body {
+            padding: 0 28px 28px;
+        }
+
+        .receipt {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .receipt-header {
+            background: linear-gradient(135deg, #1a0505, #1a1a1a);
+            padding: 20px 24px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .receipt-car-img {
+            width: 80px;
+            height: 60px;
+            border-radius: 6px;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+
+        .receipt-car-img img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .receipt-logo {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.6rem;
+            letter-spacing: 4px;
+            color: var(--white);
+        }
+
+        .receipt-logo span {
+            color: var(--red);
+        }
+
+        .receipt-id {
+            font-family: 'Space Mono', monospace;
+            font-size: .7rem;
+            color: var(--gray);
+            margin-top: 3px;
+        }
+
+        .receipt-rows {
+            padding: 16px 24px;
+        }
+
+        .receipt-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 9px 0;
+            border-bottom: 1px solid var(--border);
+            font-size: .88rem;
+        }
+
+        .receipt-row:last-child {
+            border-bottom: none;
+        }
+
+        .receipt-row .label {
+            color: var(--gray);
+        }
+
+        .receipt-row .value {
+            color: var(--light);
+            font-weight: 500;
+        }
+
+        .receipt-total {
+            background: linear-gradient(135deg, rgba(201, 168, 76, .08), rgba(201, 168, 76, .03));
+            padding: 14px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid var(--border);
+        }
+
+        .receipt-total .label {
+            font-size: .9rem;
+            font-weight: 700;
+            color: var(--white);
+        }
+
+        .receipt-total .value {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 2rem;
+            color: var(--gold);
+        }
+
+        /* PROFILE MENU */
+        .profile-menu {
+            position: fixed;
+            top: 78px;
+            left: 24px;
+            width: 290px;
+            background: var(--dark);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, .7);
+            z-index: 300;
+            display: none;
+        }
+
+        .profile-menu.open {
+            display: block;
+            animation: fadeIn .2s ease;
+        }
+
+        .profile-menu-header {
+            display: flex;
+            gap: 14px;
+            align-items: center;
+            padding: 18px;
+            background: linear-gradient(135deg, #1a0505, #1a1a1a);
+            border-bottom: 1px solid var(--border);
+            border-radius: 12px 12px 0 0;
+        }
+
+        .profile-avatar-lg {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--red), #a00);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Space Mono', monospace;
+            font-size: .9rem;
+            font-weight: 700;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .profile-avatar-xl {
+            width: 76px;
+            height: 76px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--red), #a00);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Space Mono', monospace;
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: white;
+            border: 3px solid rgba(230, 48, 48, .4);
+            box-shadow: 0 0 24px var(--red-glow);
+        }
+
+        .profile-fullname {
+            font-weight: 700;
+            font-size: .9rem;
+            color: var(--white);
+        }
+
+        .profile-email {
+            font-size: .72rem;
+            color: var(--gray);
+            margin-top: 2px;
+        }
+
+        .profile-badge {
+            display: inline-block;
+            margin-top: 5px;
+            font-family: 'Space Mono', monospace;
+            font-size: .58rem;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            padding: 3px 8px;
+            border-radius: 3px;
+            background: rgba(201, 168, 76, .15);
+            color: var(--gold);
+            border: 1px solid rgba(201, 168, 76, .3);
+        }
+
+        .profile-menu-stats {
+            display: flex;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .pm-stat {
+            flex: 1;
+            text-align: center;
+            padding: 12px 8px;
+            border-right: 1px solid var(--border);
+        }
+
+        .pm-stat:last-child {
+            border-right: none;
+        }
+
+        .pm-val {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.2rem;
+            color: var(--red);
+            line-height: 1;
+        }
+
+        .pm-lbl {
+            font-size: .6rem;
+            color: var(--gray);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 3px;
+        }
+
+        .profile-menu-items {
+            padding: 8px;
+        }
+
+        .pm-item {
+            padding: 10px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: .84rem;
+            color: var(--light);
+            transition: all .15s;
+        }
+
+        .pm-item:hover {
+            background: var(--border);
+            color: var(--white);
+        }
+
+        .pm-logout {
+            color: var(--gray);
+        }
+
+        .pm-logout:hover {
+            background: rgba(230, 48, 48, .1);
+            color: var(--red);
+        }
+
+        /* AUTH */
+        .signup-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 500;
+            background: rgba(0, 0, 0, .85);
+            backdrop-filter: blur(6px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity .3s;
+            padding: 20px;
+            overflow: auto;
+        }
+
+        .signup-overlay.open {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .signup-box {
+            background: var(--dark);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            width: 100%;
+            max-width: 480px;
+            overflow-y: auto;
+            box-shadow: 0 30px 80px rgba(0, 0, 0, .8);
+            transform: translateY(20px);
+            transition: transform .3s;
+            max-height: 90vh;
+            margin: auto;
+        }
+
+        .signup-overlay.open .signup-box {
+            transform: translateY(0);
+        }
+
+        .signup-top {
+            background: linear-gradient(135deg, #1a0505, #181818);
+            padding: 32px 36px 24px;
+            text-align: center;
+            border-bottom: 1px solid var(--border);
+            position: relative;
+        }
+
+        .signup-close {
+            position: absolute;
+            top: 14px;
+            right: 16px;
+            background: none;
+            border: none;
+            color: var(--gray);
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: color .2s;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .signup-close:hover {
+            color: var(--white);
+            background: var(--border);
+        }
+
+        .signup-logo {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 2rem;
+            letter-spacing: 6px;
+            color: var(--white);
+            margin-bottom: 5px;
+        }
+
+        .signup-logo span {
+            color: var(--red);
+        }
+
+        .signup-tagline {
+            font-size: .8rem;
+            color: var(--gray);
+            letter-spacing: 1px;
+        }
+
+        .signup-body {
+            padding: 28px 36px;
+        }
+
+        .signup-tabs {
+            display: flex;
+            background: var(--black);
+            border-radius: 8px;
+            padding: 4px;
+            margin-bottom: 24px;
+            gap: 4px;
+        }
+
+        .stab {
+            flex: 1;
+            text-align: center;
+            padding: 8px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: .8rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: var(--gray);
+            transition: all .2s;
+            border: none;
+            background: none;
+            font-family: 'DM Sans', sans-serif;
+        }
+
+        .stab.active {
+            background: var(--red);
+            color: var(--white);
+        }
+
+        .signup-panel {
+            display: none;
+        }
+
+        .signup-panel.active {
+            display: block;
+            animation: fadeIn .25s ease;
+        }
+
+        .signup-divider {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 18px 0;
+        }
+
+        .signup-divider::before,
+        .signup-divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+        }
+
+        .signup-divider span {
+            font-size: .7rem;
+            color: var(--gray);
+            letter-spacing: 2px;
+        }
+
+        .social-btn {
+            width: 100%;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: var(--card);
+            color: var(--light);
+            font-family: 'DM Sans', sans-serif;
+            font-size: .84rem;
+            cursor: pointer;
+            transition: all .2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .social-btn:hover {
+            border-color: #444;
+            background: #222;
+            color: var(--white);
+        }
+
+        .signup-footer {
+            text-align: center;
+            margin-top: 18px;
+            font-size: .76rem;
+            color: var(--gray);
+        }
+
+        .signup-footer a {
+            color: var(--red);
+            cursor: pointer;
+        }
+
+        .signup-success {
+            text-align: center;
+            padding: 20px 0;
+        }
+
+        .signup-success .s-icon {
+            font-size: 3.5rem;
+            margin-bottom: 14px;
+        }
+
+        .signup-success h3 {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.9rem;
+            letter-spacing: 3px;
+            color: var(--white);
+            margin-bottom: 10px;
+        }
+
+        .signup-success p {
+            color: var(--gray);
+            font-size: .86rem;
+            line-height: 1.6;
+        }
+
+        .strength-bar {
+            height: 3px;
+            background: var(--border);
+            border-radius: 2px;
+            margin-top: 5px;
+            overflow: hidden;
+        }
+
+        .strength-fill {
+            height: 100%;
+            width: 0;
+            border-radius: 2px;
+            transition: width .3s, background .3s;
+        }
+
+        .strength-label {
+            font-size: .68rem;
+            color: var(--gray);
+            margin-top: 3px;
+        }
+
+        .input-icon-wrap {
+            position: relative;
+        }
+
+        .input-icon-wrap .i-icon {
+            position: absolute;
+            left: 13px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: .9rem;
+            pointer-events: none;
+        }
+
+        .input-icon-wrap input {
+            padding-left: 36px;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-group label {
+            display: block;
+            font-family: 'Space Mono', monospace;
+            font-size: .62rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--gray);
+            margin-bottom: 7px;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--white);
+            font-family: 'DM Sans', sans-serif;
+            font-size: .92rem;
+            padding: 11px 14px;
+            outline: none;
+            transition: border-color .2s;
+            appearance: none;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            border-color: var(--red);
+        }
+
+        .form-group select option {
+            background: var(--card);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+
+        /* TOAST */
+        .toast {
+            position: fixed;
+            bottom: 28px;
+            right: 28px;
+            background: var(--card);
+            border: 1px solid var(--success);
+            color: var(--success);
+            padding: 14px 22px;
+            border-radius: 8px;
+            font-size: .88rem;
+            font-family: 'Space Mono', monospace;
+            z-index: 9999;
+            display: none;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, .5);
+            max-width: 320px;
+        }
+
+        .toast.show {
+            display: block;
+            animation: slideUp .3s ease;
+        }
+
+        .toast.error {
+            border-color: var(--red);
+            color: var(--red);
+        }
+
+        .toast.warn {
+            border-color: var(--warning);
+            color: var(--warning);
+        }
+
+        /* EMPTY STATE */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--gray);
+        }
+
+        .empty-state .icon {
+            font-size: 3rem;
+            margin-bottom: 14px;
+            opacity: .5;
+        }
+
+        .empty-state p {
+            font-size: .95rem;
+        }
+
+        /* FOOTER */
+        footer {
+            background: #0a0a0a;
+            border-top: 1px solid var(--border);
+            padding: 48px 48px 28px;
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+
+        .footer-brand-logo {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 2.2rem;
+            letter-spacing: 6px;
+            color: var(--white);
+            margin-bottom: 12px;
+        }
+
+        .footer-brand-logo span {
+            color: var(--red);
+        }
+
+        .footer-brand-desc {
+            font-size: .83rem;
+            color: var(--gray);
+            line-height: 1.75;
+            max-width: 260px;
+            margin-bottom: 20px;
+        }
+
+        .footer-col-title {
+            font-family: 'Space Mono', monospace;
+            font-size: .65rem;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: var(--white);
+            margin-bottom: 16px;
+        }
+
+        .footer-links {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .footer-link {
+            font-size: .83rem;
+            color: var(--gray);
+            text-decoration: none;
+            cursor: pointer;
+            transition: color .2s;
+        }
+
+        .footer-link:hover {
+            color: var(--white);
+        }
+
+        .footer-contact-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            font-size: .81rem;
+            color: var(--gray);
+            margin-bottom: 10px;
+        }
+
+        .footer-contact-item span:first-child {
+            color: var(--red);
+            flex-shrink: 0;
+        }
+
+        .footer-bottom {
+            border-top: 1px solid var(--border);
+            padding-top: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 14px;
+        }
+
+        .footer-bottom-left {
+            font-size: .76rem;
+            color: var(--gray);
+        }
+
+        .footer-bottom-left span {
+            color: var(--red);
+        }
+
+        .footer-bottom-links {
+            display: flex;
+            gap: 20px;
+        }
+
+        .footer-bottom-link {
+            font-size: .73rem;
+            color: var(--gray);
+            cursor: pointer;
+            transition: color .2s;
+        }
+
+        .footer-bottom-link:hover {
+            color: var(--white);
+        }
+
+        .footer-nl {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 24px 40px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 28px;
+            margin-bottom: 48px;
+        }
+
+        .footer-nl-title {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.5rem;
+            letter-spacing: 3px;
+            color: var(--white);
+            margin-bottom: 5px;
+        }
+
+        .footer-nl-sub {
+            font-size: .8rem;
+            color: var(--gray);
+        }
+
+        .footer-nl-form {
+            display: flex;
+            gap: 10px;
+            flex-shrink: 0;
+        }
+
+        .footer-nl-form input {
+            background: var(--dark);
+            border: 1px solid var(--border);
+            color: var(--white);
+            padding: 10px 16px;
+            border-radius: 6px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: .83rem;
+            width: 210px;
+            outline: none;
+            transition: border-color .2s;
+        }
+
+        .footer-nl-form input:focus {
+            border-color: var(--red);
+        }
+
+        .footer-nl-form input::placeholder {
+            color: var(--gray);
+        }
+
+        .footer-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-family: 'Space Mono', monospace;
+            font-size: .6rem;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            padding: 4px 10px;
+            border-radius: 4px;
+            background: rgba(46, 204, 113, .1);
+            color: var(--success);
+            border: 1px solid rgba(46, 204, 113, .25);
+            margin-bottom: 7px;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px)
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0)
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px)
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0)
+            }
+        }
+
+        @media(max-width:768px) {
+            header {
+                padding: 0 16px;
+            }
+
+            nav a {
+                font-size: .72rem;
+                padding: 6px 9px;
+            }
+
+            .stats-row {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .booking-card-inner {
+                flex-direction: column;
+            }
+
+            .booking-car-img {
+                width: 100%;
+                height: 160px;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            footer {
+                padding: 36px 20px 20px;
+            }
+
+            .footer-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 24px;
+            }
+
+            .footer-nl {
+                flex-direction: column;
+                padding: 20px;
+            }
+
+            .footer-nl-form {
+                flex-direction: column;
+                width: 100%;
+            }
+
+            .footer-nl-form input {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <a href="/home2" class="logo">VELO<span>CE</span></a>
+        <nav>
+            <a href="/home2">Home</a>
+            <a href="/cars">Cars</a>
+            <a href="/availability">Availability</a>
+            <a href="/mybooking" class="active">My Bookings</a>
+            <a href="/about">About</a>
+        </nav>
+        <div class="header-actions">
+            <button class="theme-btn" id="themeBtn" onclick="toggleTheme()">🌙</button>
+            <div class="profile-circle" id="headerProfileCircle" onclick="toggleProfileMenu()">JD<div
+                    class="profile-online"></div>
+            </div>
+        </div>
+    </header>
+
+    <main style="padding:100px 48px 48px;min-height:80vh">
+        <div class="section-header">
+            <h2>MY BOOKINGS</h2><span>// Rental history</span>
+        </div>
+        <div th:if="${param.success}"
+
+     style="
+
+        color:#38ef7d;
+
+        font-size:18px;
+
+        margin-bottom:20px;
+
+        font-weight:600;">
+
+    ✅ Booking Confirmed Successfully
+
+</div>
+        <div class="stats-row" id="bookingStats"></div>
+        <div id="bookingList"></div>
+
+        <div class="booking-toolbar">
+            <div class="booking-search">
+                <input type="text" id="searchInput" placeholder="Search by car name, booking ID…"
+                    oninput="renderBookings()">
+                <span class="s-icon">🔍</span>
+            </div>
+            <button class="filter-chip active" data-bf="all" onclick="filterBookings('all',this)">All</button>
+            <button class="filter-chip" data-bf="upcoming" onclick="filterBookings('upcoming',this)">Upcoming</button>
+            <button class="filter-chip" data-bf="active" onclick="filterBookings('active',this)">Active</button>
+            <button class="filter-chip" data-bf="completed"
+                onclick="filterBookings('completed',this)">Completed</button>
+            <button class="filter-chip" data-bf="cancelled"
+                onclick="filterBookings('cancelled',this)">Cancelled</button>
+        </div>
+
+        <div class="booking-list" id="bookingList"></div>
+
+        <div id="bookingCta" style="display:none;text-align:center;margin-top:40px">
+            <p style="color:var(--gray);margin-bottom:20px;font-size:.95rem">No bookings yet. Browse our fleet to get
+                started.</p>
+            <a href="/cars" class="btn btn-red" style="padding:13px 32px;font-size:.88rem;text-decoration:none">🚗
+                Browse Our Fleet</a>
+        </div>
+    </main>
+
+    <footer>
+        <div class="footer-nl">
+            <div>
+                <div class="footer-badge">🔔 Stay Updated</div>
+                <div class="footer-nl-title">GET EXCLUSIVE DEALS</div>
+                <div class="footer-nl-sub">Subscribe for early access and members-only discounts.</div>
+            </div>
+            <div class="footer-nl-form">
+                <input type="email" id="nlEmail" placeholder="Enter your email…">
+                <button class="btn btn-red" style="padding:10px 20px;white-space:nowrap"
+                    onclick="subscribeNewsletter()">Subscribe →</button>
+            </div>
+        </div>
+        <div class="footer-grid">
+            <div>
+                <div class="footer-brand-logo">VELO<span>CE</span></div>
+                <div class="footer-brand-desc">Hyderabad's most premium car rental service. Hand-curated fleet — booked
+                    in minutes.</div>
+            </div>
+            <div>
+                <div class="footer-col-title">// Fleet</div>
+                <div class="footer-links"><a class="footer-link" href="/cars?filter=Sport">⚡ Sport Cars</a>
+                        <a class="footer-link" href="/cars?filter=Luxury">✨ Luxury Cars</a>
+                       <a class="footer-link" href="/cars?filter=SUV">🚙 SUVs</a></div>
+            </div>
+            <div>
+                <div class="footer-col-title">// Company</div>
+                <div class="footer-links"><a class="footer-link" href="/about">🏢 About Veloce</a><a class="footer-link"
+                        href="/availability">🔍 Availability</a></div>
+            </div>
+            <div>
+                <div class="footer-col-title">// Contact</div>
+                <div class="footer-contact-item"><span>📞</span><span>+91 9603847168</span></div>
+                <div class="footer-contact-item"><span>📞</span><span>+91 81849 41066</span></div>
+                <div class="footer-contact-item"><span>✉️</span><span>hello@veloce.in</span></div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <div class="footer-bottom-left">© 2025 <span>Veloce Premium Rentals</span> · All rights reserved</div>
+            <div class="footer-bottom-links"><span class="footer-bottom-link">Privacy Policy</span><span
+                    class="footer-bottom-link">Terms of Service</span></div>
+        </div>
+    </footer>
+
+    <!-- CONFIRM DIALOG -->
+    <div class="confirm-overlay" id="confirmOverlay">
+        <div class="confirm-box">
+            <div class="confirm-icon">⚠️</div>
+            <div class="confirm-title">CANCEL BOOKING?</div>
+            <div class="confirm-msg" id="confirmMsg">This will cancel your booking and free up the vehicle. This action
+                cannot be undone.</div>
+            <div class="confirm-actions">
+                <button class="btn btn-outline" onclick="closeConfirm()">Keep Booking</button>
+                <button class="btn btn-red" onclick="doCancel()">Yes, Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- RECEIPT MODAL -->
+    <div class="modal-overlay" id="receiptOverlay">
+        <div class="modal" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <h3>BOOKING RECEIPT</h3><button class="modal-close" onclick="closeReceipt()">✕</button>
+            </div>
+            <div class="modal-body" id="receiptBody"></div>
+        </div>
+    </div>
+
+    <!-- PROFILE EDIT MODAL -->
+    <div class="modal-overlay" id="profileModalOverlay">
+        <div class="modal" onclick="event.stopPropagation()" style="width:440px">
+            <div class="modal-header">
+                <h3>EDIT PROFILE</h3><button class="modal-close" onclick="closeProfileModal()">✕</button>
+            </div>
+            <div class="modal-body">
+                <div style="display:flex;flex-direction:column;align-items:center;margin-bottom:24px">
+                    <div class="profile-avatar-xl" id="profileAvatarXl">JD</div><button class="btn btn-outline"
+                        style="margin-top:10px;font-size:.72rem;padding:7px 14px" onclick="cycleAvatarColor()">Change
+                        Colour</button>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>First Name</label><input type="text" id="pFirstName"></div>
+                    <div class="form-group"><label>Last Name</label><input type="text" id="pLastName"></div>
+                </div>
+                <div class="form-group"><label>Email</label><input type="email" id="pEmail"></div>
+                <div class="form-group"><label>Phone</label><input type="tel" id="pPhone"></div>
+                <div class="form-group"><label>City</label><select id="pCity">
+                        <option>Hyderabad</option>
+                        <option>Mumbai</option>
+                        <option>Delhi</option>
+                        <option>Bangalore</option>
+                        <option>Chennai</option>
+                    </select></div>
+                <button class="btn btn-red" style="width:100%;padding:13px;margin-top:4px" onclick="saveProfile()">Save
+                    Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SIGNUP/LOGIN -->
+    <div class="signup-overlay" id="signupOverlay">
+        <div class="signup-box" onclick="event.stopPropagation()">
+            <div class="signup-top"><button class="signup-close" onclick="closeSignup()">✕</button>
+                <div class="signup-logo">VELO<span>CE</span></div>
+                <div class="signup-tagline">Premium Car Rentals · Hyderabad</div>
+            </div>
+            <div class="signup-body">
+                <div class="signup-tabs"><button class="stab active" id="stab-signup"
+                        onclick="switchAuthTab('signup')">Create Account</button><button class="stab" id="stab-login"
+                        onclick="switchAuthTab('login')">Sign In</button></div>
+                <div class="signup-panel active" id="panel-signup">
+                    <div class="form-row">
+                        <div class="form-group"><label>First Name</label>
+                            <div class="input-icon-wrap"><span class="i-icon">👤</span><input type="text" id="su-first"
+                                    placeholder="Arjun"></div>
+                        </div>
+                        <div class="form-group"><label>Last Name</label><input type="text" id="su-last"
+                                placeholder="Reddy"></div>
+                    </div>
+                    <div class="form-group"><label>Email</label>
+                        <div class="input-icon-wrap"><span class="i-icon">✉️</span><input type="email" id="su-email"
+                                placeholder="you@email.com"></div>
+                    </div>
+                    <div class="form-group"><label>Password</label>
+                        <div class="input-icon-wrap"><span class="i-icon">🔒</span><input type="password" id="su-pass"
+                                placeholder="Min. 8 characters" oninput="checkStrength(this.value)"></div>
+                        <div class="strength-bar">
+                            <div class="strength-fill" id="strengthFill"></div>
+                        </div>
+                        <div class="strength-label" id="strengthLabel"></div>
+                    </div>
+                    <div class="form-group"><label>Confirm Password</label>
+                        <div class="input-icon-wrap"><span class="i-icon">🔒</span><input type="password" id="su-pass2"
+                                placeholder="Repeat password"></div>
+                    </div>
+                    <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:18px"><input type="checkbox"
+                            id="su-terms" style="margin-top:3px;accent-color:var(--red)"><label for="su-terms"
+                            style="font-size:.76rem;color:var(--gray);cursor:pointer;line-height:1.5">I agree to the <a
+                                href="#" style="color:var(--red)">Terms of Service</a></label></div>
+                    <button class="btn btn-red" style="width:100%;padding:12px" onclick="handleSignup()">🚀 Create My
+                        Account</button>
+                    <div class="signup-footer">Already have an account? <a onclick="switchAuthTab('login')">Sign in
+                            →</a></div>
+                </div>
+                <div class="signup-panel" id="panel-login">
+                    <div class="form-group"><label>Email</label>
+                        <div class="input-icon-wrap"><span class="i-icon">✉️</span><input type="email" id="li-email"
+                                placeholder="you@email.com"></div>
+                    </div>
+                    <div class="form-group"><label>Password</label>
+                        <div class="input-icon-wrap"><span class="i-icon">🔒</span><input type="password" id="li-pass"
+                                placeholder="Your password"></div>
+                    </div>
+                    <button class="btn btn-red" style="width:100%;padding:12px" onclick="handleLogin()">🔑 Sign In to
+                        Veloce</button>
+                    <div class="signup-footer">Don't have an account? <a onclick="switchAuthTab('signup')">Create one
+                            →</a></div>
+                </div>
+                <div class="signup-panel" id="panel-success">
+                    <div class="signup-success">
+                        <div class="s-icon">🎉</div>
+                        <h3>WELCOME TO VELOCE!</h3>
+                        <p id="successMsg">Your account is ready.</p><button class="btn btn-red"
+                            style="margin-top:22px;padding:11px 32px" onclick="closeSignup()">Start Exploring →</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PROFILE MENU -->
+    <div class="profile-menu" id="profileMenu">
+        <div class="profile-menu-header">
+            <div class="profile-avatar-lg" id="pmAvatar">JD</div>
+            <div>
+                <div class="profile-fullname" id="pmName">John Doe</div>
+                <div class="profile-email" id="pmEmail">johndoe@email.com</div>
+                <div class="profile-badge">Premium Member</div>
+            </div>
+        </div>
+        <div class="profile-menu-stats">
+            <div class="pm-stat">
+                <div class="pm-val" id="pm-bookings">0</div>
+                <div class="pm-lbl">Bookings</div>
+            </div>
+            <div class="pm-stat">
+                <div class="pm-val" id="pm-spent">₹0</div>
+                <div class="pm-lbl">Spent</div>
+            </div>
+            <div class="pm-stat">
+                <div class="pm-val">Gold</div>
+                <div class="pm-lbl">Tier</div>
+            </div>
+        </div>
+        <div class="profile-menu-items">
+            <div class="pm-item" onclick="location.href='/mybooking'">📋 My Bookings</div>
+            <div class="pm-item" onclick="location.href='/availability'">🔍 Check Availability</div>
+            <div class="pm-item" onclick="openEditProfile()">✏️ Edit Profile</div>
+            <div class="pm-item pm-logout" onclick="signOut()">🚪 Sign Out</div>
+        </div>
+    </div>
+    <div class="toast" id="toast"></div>
+
+    <script>
+        /* ═══ STORAGE ═══ */
+        const S = {
+            get: (k) => { try { return JSON.parse(localStorage.getItem(k) || 'null') } catch { return null } },
+            set: (k, v) => localStorage.setItem(k, JSON.stringify(v)),
+            getBookedIds: () => S.get('veloce_booked_ids') || [],
+            setBookedIds: (ids) => S.set('veloce_booked_ids', ids),
+            getBookings: () => S.get('veloce_bookings') || [],
+            setBookings: (b) => S.set('veloce_bookings', b),
+            cancelBooking: (id) => {
+                const l = S.getBookings().map(b => b.id === id ? { ...b, status: 'cancelled' } : b);
+                S.setBookings(l);
+                const b = l.find(b => b.id === id);
+                if (b) { const ids = S.getBookedIds().filter(i => i !== b.carId); S.setBookedIds(ids); }
+            },
+            getProfile: () => S.get('veloce_profile') || {},
+            setProfile: (p) => S.set('veloce_profile', p),
+            getTheme: () => S.get('veloce_theme') || 'dark',
+            setTheme: (t) => S.set('veloce_theme', t),
+        };
+        const fmt = (n) => '₹' + Number(n).toLocaleString('en-IN');
+
+        /* ═══ THEME ═══ */
+        function applyTheme() { const t = S.getTheme(); document.body.classList.toggle('light', t === 'light'); const btn = document.getElementById('themeBtn'); if (btn) btn.textContent = t === 'light' ? '🌙' : '☀️'; }
+        function toggleTheme() { const t = S.getTheme() === 'dark' ? 'light' : 'dark'; S.setTheme(t); applyTheme(); }
+        applyTheme();
+
+        /* ═══ TOAST ═══ */
+        function showToast(msg, type = '') { const t = document.getElementById('toast'); if (!t) return; t.textContent = msg; t.className = 'toast show ' + (type || ''); clearTimeout(t._t); t._t = setTimeout(() => t.classList.remove('show'), 3500); }
+        function subscribeNewsletter() { const el = document.getElementById('nlEmail'); if (!el) return; const e = el.value.trim(); if (!e || !e.includes('@')) { showToast('⚠️ Enter a valid email.', 'warn'); return; } el.value = ''; showToast('🎉 Subscribed!'); }
+
+        /* ═══ PROFILE ═══ */
+        const AVATAR_COLORS = ['linear-gradient(135deg,#e63030,#a00)', 'linear-gradient(135deg,#c9a84c,#8a6f2e)', 'linear-gradient(135deg,#2ecc71,#1a8a4a)', 'linear-gradient(135deg,#3498db,#1a5a8a)', 'linear-gradient(135deg,#9b59b6,#5a2d82)'];
+        let _avatarIdx = 0;
+        let profile = Object.assign({ first: 'John', last: 'Doe', email: 'johndoe@email.com', phone: '+91 9999999999', city: 'Hyderabad' }, S.getProfile());
+        const getIni = () => ((profile.first || 'J')[0] + (profile.last || 'D')[0]).toUpperCase();
+        function updateProfileUI() {
+            const ini = getIni();
+            ['headerProfileCircle', 'pmAvatar', 'profileAvatarXl'].forEach(id => { const el = document.getElementById(id); if (el) el.textContent = ini; });
+            const pn = document.getElementById('pmName'); if (pn) pn.textContent = profile.first + ' ' + profile.last;
+            const pe = document.getElementById('pmEmail'); if (pe) pe.textContent = profile.email;
+            const bookings = S.getBookings().filter(b => b.status !== 'cancelled');
+            const bc = document.getElementById('pm-bookings'); if (bc) bc.textContent = bookings.length;
+            const sp = bookings.reduce((a, b) => a + (b.total || 0), 0);
+            const bs = document.getElementById('pm-spent'); if (bs) bs.textContent = fmt(sp);
+            const circle = document.getElementById('headerProfileCircle');
+            if (circle && !circle.querySelector('.profile-online')) { const dot = document.createElement('div'); dot.className = 'profile-online'; circle.appendChild(dot); }
+        }
+        function toggleProfileMenu() { updateProfileUI(); document.getElementById('profileMenu').classList.toggle('open'); }
+        function closeProfileMenu() { document.getElementById('profileMenu').classList.remove('open'); }
+        document.addEventListener('click', e => { const m = document.getElementById('profileMenu'); if (m && m.classList.contains('open') && !m.contains(e.target) && !e.target.closest('#headerProfileCircle')) closeProfileMenu(); });
+        function openEditProfile() { closeProfileMenu(); document.getElementById('pFirstName').value = profile.first; document.getElementById('pLastName').value = profile.last; document.getElementById('pEmail').value = profile.email; document.getElementById('pPhone').value = profile.phone; document.getElementById('pCity').value = profile.city || 'Hyderabad'; const pax = document.getElementById('profileAvatarXl'); pax.textContent = getIni(); pax.style.background = AVATAR_COLORS[_avatarIdx]; document.getElementById('profileModalOverlay').classList.add('open'); }
+        function closeProfileModal() { document.getElementById('profileModalOverlay').classList.remove('open'); }
+        function cycleAvatarColor() { _avatarIdx = (_avatarIdx + 1) % AVATAR_COLORS.length; document.getElementById('profileAvatarXl').style.background = AVATAR_COLORS[_avatarIdx]; }
+        function saveProfile() { profile.first = document.getElementById('pFirstName').value.trim() || profile.first; profile.last = document.getElementById('pLastName').value.trim() || profile.last; profile.email = document.getElementById('pEmail').value.trim() || profile.email; profile.phone = document.getElementById('pPhone').value.trim() || profile.phone; profile.city = document.getElementById('pCity').value; S.setProfile(profile); updateProfileUI(); closeProfileModal(); showToast('✅ Profile updated!'); }
+        function signOut() { profile = { first: 'Guest', last: '', email: '', phone: '', city: 'Hyderabad' }; S.setProfile(profile); updateProfileUI(); closeProfileMenu(); showToast('👋 Signed out. See you soon!'); }
+
+        /* ═══ AUTH ═══ */
+        function openSignup() { switchAuthTab('signup'); document.getElementById('signupOverlay').classList.add('open'); }
+        function closeSignup() { document.getElementById('signupOverlay').classList.remove('open'); }
+        function switchAuthTab(tab) { document.querySelectorAll('.stab').forEach(b => b.classList.remove('active')); document.querySelectorAll('.signup-panel').forEach(p => p.classList.remove('active')); const tb = document.getElementById('stab-' + tab); if (tb) tb.classList.add('active'); const pn = document.getElementById('panel-' + tab); if (pn) pn.classList.add('active'); }
+        function checkStrength(v) { let s = 0; if (v.length >= 8) s++; if (/[A-Z]/.test(v)) s++; if (/[0-9]/.test(v)) s++; if (/[^A-Za-z0-9]/.test(v)) s++; const c = ['', '#e63030', '#f39c12', '#2ecc71', '#2ecc71']; const l = ['', 'Weak', 'Fair', 'Good', 'Strong']; const f = document.getElementById('strengthFill'); const lb = document.getElementById('strengthLabel'); f.style.width = (s * 25) + '%'; f.style.background = c[s]; lb.textContent = l[s]; lb.style.color = c[s]; }
+        function handleSignup() { const f = document.getElementById('su-first').value.trim(), l = document.getElementById('su-last').value.trim(), e = document.getElementById('su-email').value.trim(), p = document.getElementById('su-pass').value, p2 = document.getElementById('su-pass2').value, t = document.getElementById('su-terms').checked; if (!f || !l || !e) { showToast('⚠️ Fill all fields.', 'warn'); return; } if (p.length < 8) { showToast('⚠️ Password min 8 chars.', 'warn'); return; } if (p !== p2) { showToast('⚠️ Passwords do not match.', 'warn'); return; } if (!t) { showToast('⚠️ Accept the Terms.', 'warn'); return; } profile.first = f; profile.last = l; profile.email = e; S.setProfile(profile); updateProfileUI(); document.getElementById('successMsg').textContent = 'Welcome, ' + f + '!'; switchAuthTab('success'); showToast('🎉 Welcome, ' + f + '!'); }
+        function handleLogin() { const e = document.getElementById('li-email').value.trim(), p = document.getElementById('li-pass').value; if (!e || !p) { showToast('⚠️ Enter email and password.', 'warn'); return; } document.getElementById('successMsg').textContent = "Welcome back! You're now signed in."; switchAuthTab('success'); showToast('👋 Welcome back!'); }
+
+        document.getElementById('confirmOverlay').addEventListener('click', e => { if (e.target === e.currentTarget) closeConfirm(); });
+        document.getElementById('receiptOverlay').addEventListener('click', e => { if (e.target === e.currentTarget) closeReceipt(); });
+        document.getElementById('profileModalOverlay').addEventListener('click', e => { if (e.target === e.currentTarget) closeProfileModal(); });
+        document.getElementById('signupOverlay').addEventListener('click', e => { if (e.target === e.currentTarget) closeSignup(); });
+
+        updateProfileUI();
+
+        /* ═══ BOOKINGS PAGE LOGIC ═══ */
+        let _bFilter = 'all', _cancelId = null;
+
+        async function renderStats() {
+
+            // ✅ get logged user bookings
+            const res = await fetch('/api/bookings');
+
+            const all = await res.json();
+
+            // ✅ total bookings
+            const totalBookings = all.length;
+
+            // ✅ total spent
+            const totalSpent =
+                all.reduce((sum, b) =>
+                    sum + b.price, 0);
+
+            // ✅ upcoming bookings
+            const today = new Date();
+
+            const upcoming =
+                all.filter(b =>
+                    new Date(b.pickupDate) > today
+                ).length;
+
+            const el =
+                document.getElementById('bookingStats');
+
+            if (!el) return;
+
+            el.innerHTML = `
+
+            <div class="stat-card">
+
+                <div class="stat-num">
+                    ${totalBookings}
+                </div>
+
+                <div class="stat-lbl">
+                    Total Bookings
+                </div>
+
+            </div>
+
+            <div class="stat-card">
+
+                <div class="stat-num"
+                     style="color:var(--gold)">
+
+                     ₹${totalSpent}
+
+                </div>
+
+                <div class="stat-lbl">
+                    Total Spent
+                </div>
+
+            </div>
+
+            <div class="stat-card">
+
+                <div class="stat-num"
+                     style="color:var(--success)">
+
+                     ${upcoming}
+
+                </div>
+
+                <div class="stat-lbl">
+                    Upcoming
+                </div>
+
+            </div>
+
+            <div class="stat-card">
+
+                <div class="stat-num"
+                     style="color:var(--gray)">
+                     0
+                </div>
+
+                <div class="stat-lbl">
+                    Cancelled
+                </div>
+
+            </div>
+            `;
+        }
+
+        async function renderBookings() {
+
+            const res = await fetch('/api/bookings');
+
+            const list = await res.json();
+
+            const el = document.getElementById('bookingList');
+
+            if (!list.length) {
+
+                el.innerHTML = "<p>No bookings found</p>";
+
+                return;
+            }
+
+            el.innerHTML = "";
+
+            list.forEach(b => {
+
+                el.innerHTML += `
+
+                <div class="booking-card">
+
+                    <h2>${b.name}</h2>
+
+                    <p>📍 ${b.pickupLocation}</p>
+
+                    <p>📅 Pickup: ${b.pickupDate}</p>
+
+                    <p>📅 Return: ${b.returnDate}</p>
+
+                    <p>💰 ₹${b.price}</p>
+
+                </div>
+
+                `;
+            });
+        }
+
+        function filterBookings(f, btn) {
+            document.querySelectorAll('[data-bf]').forEach(b => b.classList.remove('active'));
+            if (btn) btn.classList.add('active');
+            _bFilter = f; renderBookings();
+        }
+
+        /* ── CANCEL ── */
+        function askCancel(id, name) {
+            _cancelId = id;
+            document.getElementById('confirmMsg').textContent = `Cancel booking for ${name}? This will free up the car and cannot be undone.`;
+            document.getElementById('confirmOverlay').classList.add('open');
+        }
+        function closeConfirm() { document.getElementById('confirmOverlay').classList.remove('open'); _cancelId = null; }
+        function doCancel() {
+            if (!_cancelId) return;
+            S.cancelBooking(_cancelId);
+            closeConfirm();
+            showToast('✅ Booking cancelled successfully.');
+            renderStats(); renderBookings(); updateProfileUI();
+        }
+
+        /* ── RECEIPT ── */
+        function openReceipt(id) {
+            const b = S.getBookings().find(x => x.id === id);
+            if (!b) return;
+            const el = document.getElementById('receiptBody');
+            el.innerHTML = `
+    <div class="receipt">
+      <div class="receipt-header">
+        <div class="receipt-car-img"><img src="${b.carImg || ''}" alt="${b.carName}" onerror="this.parentElement.innerHTML='<div style=font-size:2.5rem;text-align:center;padding:8px>${b.carEmoji || '🚗'}</div>'"></div>
+        <div><div class="receipt-logo">VELO<span>CE</span></div><div class="receipt-id">Booking #${b.id}</div></div>
+      </div>
+      <div class="receipt-rows">
+        <div class="receipt-row"><span class="label">Vehicle</span><span class="value">${b.carName}</span></div>
+        <div class="receipt-row"><span class="label">Customer</span><span class="value">${b.name}</span></div>
+        <div class="receipt-row"><span class="label">Phone</span><span class="value">${b.phone || '—'}</span></div>
+        <div class="receipt-row"><span class="label">Pick-up</span><span class="value">${b.start}</span></div>
+        <div class="receipt-row"><span class="label">Return</span><span class="value">${b.end}</span></div>
+        <div class="receipt-row"><span class="label">Duration</span><span class="value">${b.days} day${b.days > 1 ? 's' : ''}</span></div>
+        <div class="receipt-row"><span class="label">Location</span><span class="value">${b.loc || '—'}</span></div>
+        <div class="receipt-row"><span class="label">Status</span><span class="value" style="text-transform:capitalize">${b.status}</span></div>
+        <div class="receipt-row"><span class="label">Booked On</span><span class="value">${b.bookedOn}</span></div>
+        <div class="receipt-row"><span class="label">Insurance</span><span class="value" style="color:var(--success)">Included ✅</span></div>
+      </div>
+      <div class="receipt-total"><span class="label">Total Amount</span><span class="value">${fmt(b.total)}</span></div>
+    </div>
+    <button class="btn btn-outline" style="width:100%;margin-top:16px;padding:12px" onclick="printReceipt('${b.id}')">🖨️ Print / Download Receipt</button>`;
+            document.getElementById('receiptOverlay').classList.add('open');
+        }
+        function closeReceipt() { document.getElementById('receiptOverlay').classList.remove('open'); }
+        function printReceipt(id) {
+            const b = S.getBookings().find(x => x.id === id); if (!b) return;
+            const w = window.open('', '_blank');
+            w.document.write(`<!DOCTYPE html><html><head><title>Receipt ${b.id}</title><style>body{font-family:sans-serif;padding:40px;max-width:500px;margin:auto;}h1{font-size:2rem;letter-spacing:4px;margin-bottom:4px;}h1 span{color:#e63030;}table{width:100%;border-collapse:collapse;margin-top:20px;}td{padding:10px 0;border-bottom:1px solid #eee;font-size:.9rem;}td:first-child{color:#666;}.total{font-size:1.4rem;font-weight:700;color:#c9a84c;text-align:right;}@media print{button{display:none}}</style></head><body><h1>VELO<span>CE</span></h1><p style="color:#888;font-size:.85rem">Booking Receipt</p><table><tr><td>Booking ID</td><td><strong>${b.id}</strong></td></tr><tr><td>Vehicle</td><td>${b.carName}</td></tr><tr><td>Customer</td><td>${b.name}</td></tr><tr><td>Phone</td><td>${b.phone || '—'}</td></tr><tr><td>Pick-up Date</td><td>${b.start}</td></tr><tr><td>Return Date</td><td>${b.end}</td></tr><tr><td>Duration</td><td>${b.days} day${b.days > 1 ? 's' : ''}</td></tr><tr><td>Location</td><td>${b.loc || '—'}</td></tr><tr><td>Insurance</td><td>Included</td></tr><tr><td>Status</td><td>${b.status}</td></tr><tr><td>Booked On</td><td>${b.bookedOn}</td></tr></table><p style="text-align:right;margin-top:20px;font-size:1rem">Total: <span class="total">₹${Number(b.total).toLocaleString('en-IN')}</span></p><button onclick="window.print()" style="margin-top:20px;padding:10px 24px;background:#e63030;color:white;border:none;border-radius:4px;cursor:pointer;font-size:.9rem">Print Receipt</button></body></html>`);
+            w.document.close();
+        }
+
+        renderStats(); renderBookings();
+    </script>
+</body>
+
+</html>

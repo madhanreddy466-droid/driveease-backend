@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VELOCE — Sign Up</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,700;1,300&family=Space+Mono:wght@400;700&display=swap');
+
+:root {
+  --black: #0a0a0a;
+  --dark: #111111;
+  --card: #181818;
+  --border: #2a2a2a;
+  --red: #e63030;
+  --red-glow: #e6303055;
+  --gold: #c9a84c;
+  --white: #f5f5f0;
+  --gray: #888888;
+  --light: #cccccc;
+  --success: #2ecc71;
+  --warning: #f39c12;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: var(--black); color: var(--white); font-family: 'DM Sans', sans-serif; min-height: 100vh; }
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: var(--dark); }
+::-webkit-scrollbar-thumb { background: var(--red); border-radius: 2px; }
+
+header {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 99999;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 48px; height: 70px; width: 100%;
+  background: rgba(10,10,10,0.98);
+  border-bottom: 1px solid var(--border);
+  backdrop-filter: blur(12px);
+  overflow: hidden; gap: 16px;
+}
+.logo { font-family: 'Bebas Neue', sans-serif; font-size: 2rem; letter-spacing: 6px; color: var(--white); text-decoration: none; }
+.logo span { color: var(--red); }
+nav { display: flex; gap: 8px; }
+nav a {
+  background: none; border: none; color: var(--gray);
+  font-family: 'DM Sans', sans-serif; font-size: 0.85rem;
+  font-weight: 500; letter-spacing: 1px; text-transform: uppercase;
+  padding: 8px 18px; border-radius: 4px; cursor: pointer;
+  transition: all 0.2s; text-decoration: none; display: inline-block;
+}
+nav a:hover { color: var(--white); background: var(--border); }
+nav a.active { color: var(--red); background: var(--border); }
+.header-btn {
+  background: var(--red); color: var(--white); border: none;
+  font-family: 'DM Sans', sans-serif; font-size: 0.82rem; font-weight: 700;
+  letter-spacing: 2px; text-transform: uppercase; padding: 10px 24px;
+  border-radius: 4px; cursor: pointer; transition: all 0.2s;
+}
+.header-btn:hover { background: #ff4040; box-shadow: 0 0 20px var(--red-glow); }
+main { padding-top: 70px; }
+
+.btn {
+  padding: 10px 20px; border-radius: 4px; font-family: 'DM Sans', sans-serif;
+  font-weight: 700; font-size: 0.8rem; letter-spacing: 1.5px; text-transform: uppercase;
+  cursor: pointer; transition: all 0.2s; border: none;
+}
+.btn-red { background: var(--red); color: white; }
+.btn-red:hover { background: #ff4040; box-shadow: 0 0 16px var(--red-glow); }
+.btn-outline { background: transparent; color: var(--white); border: 1px solid var(--border); }
+.btn-outline:hover { border-color: var(--red); color: var(--red); }
+.btn-gold { background: var(--gold); color: var(--black); }
+.btn-gold:hover { background: #e0b85c; }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.form-group { margin-bottom: 20px; }
+.form-group label { display: block; font-family: 'Space Mono', monospace; font-size: 0.65rem; letter-spacing: 2px; text-transform: uppercase; color: var(--gray); margin-bottom: 8px; }
+.form-group input, .form-group select {
+  width: 100%; background: var(--card); border: 1px solid var(--border); border-radius: 6px;
+  color: var(--white); font-family: 'DM Sans', sans-serif; font-size: 0.95rem; padding: 12px 16px;
+  outline: none; transition: border-color 0.2s; appearance: none;
+}
+.form-group input:focus, .form-group select:focus { border-color: var(--red); }
+.form-group select option { background: var(--card); }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.input-icon-wrap { position: relative; }
+.input-icon-wrap .i-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); font-size: 0.9rem; pointer-events: none; }
+.input-icon-wrap input { padding-left: 38px; }
+
+.toast { position: fixed; bottom: 32px; right: 32px; background: var(--card); border: 1px solid var(--success); color: var(--success); padding: 16px 24px; border-radius: 8px; font-size: 0.9rem; font-family: 'Space Mono', monospace; z-index: 9999; display: none; box-shadow: 0 8px 32px rgba(0,0,0,0.5); }
+.toast.show { display: block; animation: slideUp 0.3s ease; }
+
+.auth-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 100px 20px 60px;
+  position: relative;
+  background: linear-gradient(135deg, #0a0a0a 0%, #1a0505 50%, #0a0a0a 100%);
+}
+.auth-page::before {
+  content: ''; position: fixed; inset: 0; pointer-events: none;
+  background:
+    repeating-linear-gradient(90deg, transparent 0, transparent 79px, rgba(255,255,255,0.018) 79px, rgba(255,255,255,0.018) 80px),
+    repeating-linear-gradient(0deg,  transparent 0, transparent 79px, rgba(255,255,255,0.018) 79px, rgba(255,255,255,0.018) 80px);
+}
+.auth-page::after {
+  content: ''; position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%);
+  width: 700px; height: 700px; border-radius: 50%; pointer-events: none;
+  background: radial-gradient(circle, rgba(230,48,48,0.12) 0%, transparent 70%);
+}
+
+.auth-right {
+  position: relative; z-index: 1;
+  width: 100%;
+  max-width: 480px;
+  background: var(--dark);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 40px 44px 44px;
+  box-shadow: 0 32px 80px rgba(0,0,0,0.7), 0 0 0 1px rgba(230,48,48,0.08);
+  display: flex; flex-direction: column; align-items: stretch;
+}
+.auth-card-logo { text-align: center; margin-bottom: 28px; }
+.auth-card-logo-text { font-family: 'Bebas Neue', sans-serif; font-size: 2.4rem; letter-spacing: 8px; color: var(--white); line-height: 1; }
+.auth-card-logo-text span { color: var(--red); }
+.auth-card-logo-tag { font-family: 'Space Mono', monospace; font-size: 0.65rem; letter-spacing: 4px; color: var(--red); text-transform: uppercase; margin-top: 6px; }
+.auth-card-divider-top { height: 1px; background: var(--border); margin-bottom: 28px; }
+
+.auth-box { width: 100%; }
+.auth-panel { display: none; }
+.auth-panel.active { display: block; animation: fadeIn 0.25s ease; }
+.auth-title { font-family: 'Bebas Neue', sans-serif; font-size: 2.2rem; letter-spacing: 3px; color: var(--white); margin-bottom: 6px; }
+.auth-sub { font-size: 0.85rem; color: var(--gray); margin-bottom: 28px; line-height: 1.5; }
+.auth-divider { display: flex; align-items: center; gap: 12px; margin: 20px 0; }
+.auth-divider::before, .auth-divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+.auth-divider span { font-size: 0.7rem; color: var(--gray); letter-spacing: 2px; text-transform: uppercase; }
+.auth-social-btn { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--card); color: var(--light); font-family: 'DM Sans', sans-serif; font-size: 0.88rem; font-weight: 500; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 10px; }
+.auth-social-btn:hover { border-color: #444; background: #222; color: var(--white); }
+.auth-footer-text { text-align: center; margin-top: 20px; font-size: 0.78rem; color: var(--gray); }
+.auth-footer-text a { color: var(--red); cursor: pointer; text-decoration: none; font-weight: 600; }
+.auth-footer-text a:hover { text-decoration: underline; }
+.auth-success { text-align: center; padding: 20px 0; }
+.auth-success .s-icon { font-size: 4rem; margin-bottom: 20px; display: block; }
+.auth-success h3 { font-family: 'Bebas Neue', sans-serif; font-size: 2.2rem; letter-spacing: 3px; color: var(--white); margin-bottom: 12px; }
+.auth-success p { color: var(--gray); font-size: 0.9rem; line-height: 1.7; margin-bottom: 24px; }
+.input-hint { font-size: 0.72rem; color: var(--gray); margin-top: 5px; }
+.strength-bar { height: 3px; background: var(--border); border-radius: 2px; margin-top: 6px; overflow: hidden; }
+.strength-fill { height: 100%; width: 0; border-radius: 2px; transition: width 0.3s, background 0.3s; }
+
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+@media (max-width: 600px) {
+  .auth-page { padding: 90px 12px 40px; }
+  .auth-right { padding: 28px 22px 32px; border-radius: 12px; }
+  .form-row { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<div style="position:fixed;top:20px;right:20px;z-index:9999">
+  <a href="index.html" style="color:var(--gray);font-size:1.4rem;text-decoration:none;width:36px;height:36px;display:flex;align-items:center;justify-content:center;border-radius:50%;border:1px solid var(--border);background:var(--card);transition:all 0.2s">✕</a>
+</div>
+
+<div class="auth-page">
+  <div class="auth-right">
+    <div class="auth-card-logo">
+      <div class="auth-card-logo-text">VELO<span>CE</span></div>
+      <div class="auth-card-logo-tag">Premium Car Rentals · Hyderabad</div>
+    </div>
+    <div class="auth-card-divider-top"></div>
+    <div class="auth-box">
+
+      <!-- ══════════ SIGN UP PANEL ══════════ -->
+      <div class="auth-panel active" id="panel-signup">
+  <div class="auth-title" style="text-align: center;">
+    JOIN VELOCE
+  </div>
+
+        <div class="auth-sub"  style="text-align: center;">Create your free account and start driving today.</div>
+
+        <button type="button" class="auth-social-btn" onclick="handleGoogleAuthPage()">
+          <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.29-8.16 2.29-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+          Continue with Google
+        </button>
+
+        <div class="auth-divider"><span>or sign up with email</span></div>
+
+        <form id="signupForm" method="post" action="/signup">
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="su-first">First Name</label>
+              <div class="input-icon-wrap">
+                <span class="i-icon">👤</span>
+                <input type="text" id="su-first" name="fname" placeholder="First name" required>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="su-last">Last Name</label>
+              <input type="text" id="su-last" name="lname" placeholder="Last name" required>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="su-email">Email Address</label>
+            <div class="input-icon-wrap">
+              <span class="i-icon">✉️</span>
+              <input type="email" id="su-email" name="email" placeholder="you@email.com" required>
+            </div>
+          </div>
+<div class="form-group">
+  <label for="su-phone">Phone Number</label>
+  
+  <div class="input-icon-wrap">
+    <span class="i-icon">📱</span>
+    
+    <input 
+      type="tel"
+      id="su-phone"
+      name="phone"
+      placeholder="9876543210"
+      pattern="[0-9]{10}"
+      maxlength="10"
+      minlength="10"
+      required
+      oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,10)"
+    >
+    
+  </div>
+</div>
+
+          <div class="form-group">
+            <label for="su-pass">Password</label>
+            <div class="input-icon-wrap">
+              <span class="i-icon">🔒</span>
+              <input type="password" id="su-pass" name="password" placeholder="Min. 8 characters"
+                     oninput="checkStrengthAuth(this.value)" required minlength="8">
+            </div>
+            <div class="strength-bar"><div class="strength-fill" id="strengthFillAuth"></div></div>
+            <div class="input-hint" id="strengthLabelAuth"></div>
+          </div>
+
+          <div class="form-group">
+            <label for="su-pass2">Confirm Password</label>
+            <div class="input-icon-wrap">
+              <span class="i-icon">🔒</span>
+              <input type="password" id="su-pass2" name="confirm_password" placeholder="Repeat password" required>
+            </div>
+          </div>
+
+          <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:22px">
+            <input type="checkbox" id="su-terms" name="terms" style="margin-top:3px;accent-color:var(--red)" required>
+            <label for="su-terms" style="font-size:0.78rem;color:var(--gray);cursor:pointer;line-height:1.6">
+              I agree to the <a href="#" style="color:var(--red)">Terms of Service</a> and
+              <a href="#" style="color:var(--red)">Privacy Policy</a>
+            </label>
+          </div>
+
+          <button type="submit" class="btn btn-red" style="width:100%;padding:14px;font-size:0.9rem">
+            🚀 Create My Account
+          </button>
+
+        </form>
+
+        <div class="auth-footer-text">Already have an account? <a href="/signin">Sign in →</a></div>
+      </div>
+
+      <!-- ══════════ SUCCESS PANEL ══════════ -->
+      <div class="auth-panel" id="panel-success">
+        <div class="auth-success">
+          <span class="s-icon">🎉</span>
+          <h3>WELCOME TO VELOCE!</h3>
+          <p>Hey <strong id="success-name" style="color:var(--white)"></strong> Your account is ready. Start exploring our premium fleet and book your first ride today.</p>
+          <a href="/signin" class="btn btn-red" style="padding:14px 36px;font-size:0.9rem;display:inline-block;text-decoration:none">🚗 Explore the Fleet →</a>
+          <div style="margin-top:16px"><a href="cars.html" style="font-size:0.82rem;color:var(--gray);text-decoration:none">Browse all cars →</a></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+function checkStrengthAuth(val) {
+  let s = 0;
+  if (val.length >= 8) s++;
+  if (/[A-Z]/.test(val)) s++;
+  if (/[0-9]/.test(val)) s++;
+  if (/[^A-Za-z0-9]/.test(val)) s++;
+  const colors = ['','#e63030','#f39c12','#2ecc71','#2ecc71'];
+  const labels = ['','Weak — try harder','Fair — getting better','Good — almost there','Strong ✓'];
+  const fill = document.getElementById('strengthFillAuth');
+  const lbl  = document.getElementById('strengthLabelAuth');
+  if (fill) { fill.style.width = (s * 25) + '%'; fill.style.background = colors[s]; }
+  if (lbl)  { lbl.textContent = labels[s]; lbl.style.color = colors[s]; }
+}
+
+document.getElementById('signupForm').addEventListener('submit', function(e) {
+  const pass = document.getElementById('su-pass').value;
+  const pass2 = document.getElementById('su-pass2').value;
+  
+  if (pass !== pass2) {
+    e.preventDefault();
+    showToast('⚠️ Passwords do not match.');
+    return false;
+  }
+});
+
+function handleGoogleAuthPage() {
+  showToast('⚠️ Connect Firebase to enable Google Sign-In.');
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  if (!t) return;
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.classList.remove('show'), 3500);
+}
+</script>
+</body>
+</html>

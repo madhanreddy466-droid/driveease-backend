@@ -1,0 +1,2030 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VELOCE — Admin Command Center</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,700;1,300&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --black: #0a0a0a;
+  --dark: #111111;
+  --card: #181818;
+  --card2: #1e1e1e;
+  --border: #2a2a2a;
+  --border2: #333333;
+  --red: #e63030;
+  --red-glow: rgba(230,48,48,0.35);
+  --red-dim: rgba(230,48,48,0.08);
+  --gold: #c9a84c;
+  --gold-dim: rgba(201,168,76,0.1);
+  --white: #f5f5f0;
+  --gray: #888888;
+  --light: #cccccc;
+  --success: #2ecc71;
+  --success-dim: rgba(46,204,113,0.1);
+  --warning: #f39c12;
+  --warning-dim: rgba(243,156,18,0.1);
+  --blue: #4a9eff;
+  --blue-dim: rgba(74,158,255,0.1);
+  --sidebar-w: 260px;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--black);color:var(--white);font-family:'DM Sans',sans-serif;min-height:100vh;overflow-x:hidden;}
+::-webkit-scrollbar{width:4px;}
+::-webkit-scrollbar-track{background:var(--dark);}
+::-webkit-scrollbar-thumb{background:var(--red);border-radius:2px;}
+
+/* ═══════════════════════════════════════
+   ADMIN LOGIN SCREEN
+═══════════════════════════════════════ */
+#loginScreen{
+  position:fixed;inset:0;z-index:9999;
+  display:flex;align-items:center;justify-content:center;
+  background:radial-gradient(ellipse 80% 80% at 50% 50%, #1a0505 0%, #0a0a0a 100%);
+}
+#loginScreen::before{
+  content:'';position:absolute;inset:0;pointer-events:none;
+  background:repeating-linear-gradient(90deg,transparent 0,transparent 79px,rgba(255,255,255,0.015) 79px,rgba(255,255,255,0.015) 80px),
+             repeating-linear-gradient(0deg,transparent 0,transparent 79px,rgba(255,255,255,0.015) 79px,rgba(255,255,255,0.015) 80px);
+}
+.login-box{
+  position:relative;z-index:1;
+  width:440px;max-width:95vw;
+  background:var(--dark);border:1px solid var(--border);
+  border-radius:16px;overflow:hidden;
+  box-shadow:0 40px 100px rgba(0,0,0,0.8),0 0 0 1px rgba(230,48,48,0.1);
+  animation:loginAppear 0.4s cubic-bezier(0.16,1,0.3,1);
+}
+@keyframes loginAppear{from{opacity:0;transform:translateY(30px) scale(0.96);}to{opacity:1;transform:none;}}
+.login-top{
+  padding:40px 40px 28px;text-align:center;
+  background:linear-gradient(135deg,#1a0808,#181818);
+  border-bottom:1px solid var(--border);
+}
+.login-logo{font-family:'Bebas Neue',sans-serif;font-size:2.8rem;letter-spacing:10px;color:var(--white);line-height:1;}
+.login-logo span{color:var(--red);}
+.login-badge{
+  display:inline-flex;align-items:center;gap:8px;
+  font-family:'Space Mono',monospace;font-size:0.6rem;letter-spacing:3px;
+  text-transform:uppercase;color:var(--red);
+  padding:6px 16px;border-radius:20px;
+  border:1px solid rgba(230,48,48,0.3);background:rgba(230,48,48,0.08);
+  margin-top:12px;
+}
+.login-body{padding:32px 40px 40px;}
+.login-title{font-family:'Bebas Neue',sans-serif;font-size:1.8rem;letter-spacing:3px;color:var(--white);margin-bottom:6px;}
+.login-sub{font-size:0.82rem;color:var(--gray);margin-bottom:28px;line-height:1.5;}
+.form-group{margin-bottom:18px;}
+.form-group label{display:block;font-family:'Space Mono',monospace;font-size:0.6rem;letter-spacing:2px;text-transform:uppercase;color:var(--gray);margin-bottom:7px;}
+.form-group input{
+  width:100%;background:var(--card);border:1px solid var(--border);border-radius:8px;
+  color:var(--white);font-family:'DM Sans',sans-serif;font-size:0.95rem;padding:12px 16px;
+  outline:none;transition:border-color 0.2s,box-shadow 0.2s;
+}
+.form-group input:focus{border-color:var(--red);box-shadow:0 0 0 3px rgba(230,48,48,0.1);}
+.login-btn{
+  width:100%;padding:14px;background:var(--red);border:none;border-radius:8px;
+  color:var(--white);font-family:'DM Sans',sans-serif;font-size:0.9rem;font-weight:700;
+  letter-spacing:2px;text-transform:uppercase;cursor:pointer;
+  transition:all 0.2s;margin-top:8px;
+}
+.login-btn:hover{background:#ff4040;box-shadow:0 0 24px var(--red-glow);}
+.login-error{
+  display:none;background:rgba(230,48,48,0.08);border:1px solid rgba(230,48,48,0.3);
+  color:var(--red);padding:12px 16px;border-radius:8px;font-size:0.82rem;
+  margin-top:16px;text-align:center;
+}
+.login-error.show{display:block;}
+
+/* ═══════════════════════════════════════
+   APP SHELL
+═══════════════════════════════════════ */
+#appShell{display:none;}
+#appShell.visible{display:flex;min-height:100vh;}
+
+/* SIDEBAR */
+.sidebar{
+  position:fixed;left:0;top:0;bottom:0;width:var(--sidebar-w);
+  background:var(--dark);border-right:1px solid var(--border);
+  display:flex;flex-direction:column;z-index:100;overflow:hidden;
+  transition:transform 0.3s;
+}
+.sidebar-logo{
+  padding:24px 24px 20px;
+  display:flex;align-items:center;gap:12px;
+  border-bottom:1px solid var(--border);
+}
+.sidebar-logo-text{font-family:'Bebas Neue',sans-serif;font-size:1.6rem;letter-spacing:5px;color:var(--white);}
+.sidebar-logo-text span{color:var(--red);}
+.sidebar-logo-badge{
+  font-family:'Space Mono',monospace;font-size:0.55rem;letter-spacing:2px;
+  text-transform:uppercase;color:var(--red);
+  padding:3px 8px;border-radius:3px;
+  border:1px solid rgba(230,48,48,0.3);background:rgba(230,48,48,0.06);
+  margin-left:auto;
+}
+.sidebar-admin-info{
+  padding:16px 20px;background:rgba(230,48,48,0.04);
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:12px;
+}
+.admin-avatar{
+  width:38px;height:38px;border-radius:50%;flex-shrink:0;
+  background:linear-gradient(135deg,var(--red),#a00);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Space Mono',monospace;font-size:0.75rem;font-weight:700;
+  border:2px solid rgba(230,48,48,0.3);
+}
+.admin-name{font-size:0.82rem;font-weight:600;color:var(--white);}
+.admin-role{font-size:0.65rem;color:var(--red);font-family:'Space Mono',monospace;letter-spacing:1px;}
+.admin-online{display:flex;align-items:center;gap:5px;font-size:0.62rem;color:var(--success);margin-top:2px;}
+.admin-online::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--success);}
+
+.sidebar-nav{flex:1;padding:12px 12px;overflow-y:auto;}
+.nav-section-label{
+  font-family:'Space Mono',monospace;font-size:0.55rem;letter-spacing:3px;
+  text-transform:uppercase;color:var(--gray);padding:10px 12px 6px;
+}
+.nav-item{
+  display:flex;align-items:center;gap:12px;
+  padding:11px 14px;border-radius:8px;margin-bottom:2px;
+  cursor:pointer;transition:all 0.15s;
+  color:var(--gray);font-size:0.85rem;font-weight:500;
+  position:relative;border:none;background:none;width:100%;text-align:left;
+}
+.nav-item:hover{background:var(--border);color:var(--light);}
+.nav-item.active{background:var(--red-dim);color:var(--red);border-left:2px solid var(--red);border-radius:0 8px 8px 0;margin-left:-12px;padding-left:26px;}
+.nav-item.active .nav-icon{opacity:1;}
+.nav-icon{font-size:1.1rem;opacity:0.6;width:22px;text-align:center;flex-shrink:0;}
+.nav-item.active .nav-icon{opacity:1;}
+.nav-badge{
+  margin-left:auto;background:var(--red);color:white;
+  font-size:0.6rem;font-family:'Space Mono',monospace;
+  padding:2px 7px;border-radius:10px;
+}
+.nav-badge.gold{background:var(--gold);color:var(--black);}
+
+.sidebar-footer{
+  padding:16px 20px;border-top:1px solid var(--border);
+}
+.logout-btn{
+  width:100%;display:flex;align-items:center;gap:10px;
+  padding:10px 14px;border-radius:8px;border:1px solid var(--border);
+  background:none;color:var(--gray);font-size:0.82rem;font-family:'DM Sans',sans-serif;
+  cursor:pointer;transition:all 0.2s;
+}
+.logout-btn:hover{border-color:var(--red);color:var(--red);background:rgba(230,48,48,0.06);}
+
+/* MAIN CONTENT */
+.main-content{
+  margin-left:var(--sidebar-w);flex:1;
+  display:flex;flex-direction:column;min-height:100vh;
+}
+.topbar{
+  position:sticky;top:0;z-index:99;
+  height:64px;background:rgba(17,17,17,0.97);
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;padding:0 32px;gap:16px;
+  backdrop-filter:blur(12px);
+}
+.topbar-title{font-family:'Bebas Neue',sans-serif;font-size:1.5rem;letter-spacing:3px;color:var(--white);}
+.topbar-sub{font-size:0.75rem;color:var(--gray);margin-left:8px;}
+.topbar-right{margin-left:auto;display:flex;align-items:center;gap:12px;}
+.topbar-time{font-family:'Space Mono',monospace;font-size:0.72rem;color:var(--gray);}
+.topbar-notify{
+  width:36px;height:36px;border-radius:8px;border:1px solid var(--border);
+  background:var(--card);display:flex;align-items:center;justify-content:center;
+  font-size:1rem;cursor:pointer;transition:all 0.2s;position:relative;
+}
+.topbar-notify:hover{border-color:var(--red);}
+.notify-dot{
+  position:absolute;top:4px;right:4px;width:8px;height:8px;
+  border-radius:50%;background:var(--red);border:2px solid var(--dark);
+}
+
+.page-content{padding:32px;flex:1;}
+
+/* ═══════════════════════════════════════
+   PANELS
+═══════════════════════════════════════ */
+.panel{display:none;}
+.panel.active{display:block;animation:panelIn 0.25s ease;}
+@keyframes panelIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
+
+.page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;}
+.page-header-left h1{font-family:'Bebas Neue',sans-serif;font-size:2.4rem;letter-spacing:3px;color:var(--white);}
+.page-header-left p{font-size:0.82rem;color:var(--gray);margin-top:4px;}
+.page-header-right{display:flex;gap:10px;}
+
+/* BUTTONS */
+.btn{
+  padding:10px 20px;border-radius:6px;font-family:'DM Sans',sans-serif;
+  font-weight:700;font-size:0.78rem;letter-spacing:1.5px;text-transform:uppercase;
+  cursor:pointer;transition:all 0.2s;border:none;display:inline-flex;align-items:center;gap:8px;
+}
+.btn-red{background:var(--red);color:white;}
+.btn-red:hover{background:#ff4040;box-shadow:0 0 16px var(--red-glow);}
+.btn-outline{background:transparent;color:var(--light);border:1px solid var(--border);}
+.btn-outline:hover{border-color:var(--red);color:var(--red);}
+.btn-gold{background:var(--gold);color:var(--black);}
+.btn-gold:hover{background:#e0b85c;}
+.btn-success{background:var(--success);color:var(--black);}
+.btn-success:hover{opacity:0.9;}
+.btn-sm{padding:6px 14px;font-size:0.7rem;}
+.btn:disabled{opacity:0.4;cursor:not-allowed;}
+
+/* KPI CARDS */
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px;}
+.kpi-card{
+  background:var(--card);border:1px solid var(--border);border-radius:10px;
+  padding:22px 24px;position:relative;overflow:hidden;transition:border-color 0.2s;
+}
+.kpi-card:hover{border-color:var(--border2);}
+.kpi-card::after{
+  content:'';position:absolute;right:-20px;top:-20px;
+  width:80px;height:80px;border-radius:50%;
+  background:radial-gradient(circle,var(--kpi-color,var(--red)) 0%,transparent 70%);
+  opacity:0.12;
+}
+.kpi-icon{font-size:1.6rem;margin-bottom:12px;}
+.kpi-label{font-family:'Space Mono',monospace;font-size:0.6rem;letter-spacing:2px;text-transform:uppercase;color:var(--gray);margin-bottom:6px;}
+.kpi-value{font-family:'Bebas Neue',sans-serif;font-size:2.6rem;line-height:1;color:var(--white);}
+.kpi-value.red{color:var(--red);}
+.kpi-value.gold{color:var(--gold);}
+.kpi-value.green{color:var(--success);}
+.kpi-value.blue{color:var(--blue);}
+.kpi-change{font-size:0.72rem;color:var(--gray);margin-top:6px;}
+.kpi-change.up{color:var(--success);}
+.kpi-change.down{color:var(--red);}
+
+/* TABLES */
+.table-wrap{background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden;}
+.table-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:18px 24px;border-bottom:1px solid var(--border);
+}
+.table-title{font-family:'Bebas Neue',sans-serif;font-size:1.3rem;letter-spacing:2px;color:var(--white);}
+.table-controls{display:flex;gap:10px;align-items:center;}
+.search-box{
+  display:flex;align-items:center;gap:8px;
+  background:var(--card2);border:1px solid var(--border);border-radius:6px;
+  padding:7px 14px;font-size:0.82rem;color:var(--gray);
+}
+.search-box input{
+  background:none;border:none;outline:none;color:var(--white);
+  font-family:'DM Sans',sans-serif;font-size:0.85rem;width:160px;
+}
+.search-box input::placeholder{color:var(--gray);}
+table{width:100%;border-collapse:collapse;}
+thead tr{border-bottom:1px solid var(--border);}
+thead th{
+  padding:12px 18px;
+  font-family:'Space Mono',monospace;font-size:0.6rem;letter-spacing:2px;
+  text-transform:uppercase;color:var(--gray);text-align:left;font-weight:400;
+  white-space:nowrap;
+}
+tbody tr{border-bottom:1px solid rgba(42,42,42,0.6);transition:background 0.15s;}
+tbody tr:last-child{border-bottom:none;}
+tbody tr:hover{background:rgba(255,255,255,0.02);}
+td{padding:14px 18px;font-size:0.88rem;color:var(--light);vertical-align:middle;}
+
+/* BADGES */
+.badge{
+  display:inline-flex;align-items:center;
+  padding:4px 10px;border-radius:4px;
+  font-family:'Space Mono',monospace;font-size:0.6rem;font-weight:700;
+  letter-spacing:1px;text-transform:uppercase;white-space:nowrap;
+}
+.badge-green{background:var(--success-dim);color:var(--success);border:1px solid rgba(46,204,113,0.2);}
+.badge-red{background:var(--red-dim);color:var(--red);border:1px solid rgba(230,48,48,0.2);}
+.badge-gold{background:var(--gold-dim);color:var(--gold);border:1px solid rgba(201,168,76,0.2);}
+.badge-gray{background:rgba(136,136,136,0.1);color:var(--gray);border:1px solid rgba(136,136,136,0.2);}
+.badge-blue{background:var(--blue-dim);color:var(--blue);border:1px solid rgba(74,158,255,0.2);}
+.badge-warning{background:var(--warning-dim);color:var(--warning);border:1px solid rgba(243,156,18,0.2);}
+
+/* ACTION BTNS in table */
+.tbl-btn{
+  padding:5px 12px;border-radius:4px;font-size:0.65rem;font-weight:700;
+  letter-spacing:1px;text-transform:uppercase;cursor:pointer;
+  transition:all 0.15s;border:1px solid;margin:2px;white-space:nowrap;
+  font-family:'DM Sans',sans-serif;
+}
+.tbl-edit{background:var(--blue-dim);color:var(--blue);border-color:rgba(74,158,255,0.3);}
+.tbl-edit:hover{background:var(--blue);color:white;}
+.tbl-delete{background:var(--red-dim);color:var(--red);border-color:rgba(230,48,48,0.3);}
+.tbl-delete:hover{background:var(--red);color:white;}
+.tbl-approve{background:var(--success-dim);color:var(--success);border-color:rgba(46,204,113,0.3);}
+.tbl-approve:hover{background:var(--success);color:var(--black);}
+.tbl-reject{background:var(--warning-dim);color:var(--warning);border-color:rgba(243,156,18,0.3);}
+.tbl-reject:hover{background:var(--warning);color:var(--black);}
+
+/* CAR THUMB */
+.car-thumb{
+  width:60px;height:38px;object-fit:cover;border-radius:4px;
+  background:var(--card2);display:block;
+}
+.car-cell{display:flex;align-items:center;gap:10px;}
+
+/* AVAILABILITY TOGGLE */
+.avail-toggle{
+  position:relative;width:44px;height:24px;
+  background:var(--border);border-radius:12px;
+  cursor:pointer;transition:background 0.2s;border:none;padding:0;
+}
+.avail-toggle.on{background:var(--success);}
+.avail-toggle::after{
+  content:'';position:absolute;left:3px;top:3px;
+  width:18px;height:18px;border-radius:50%;background:white;
+  transition:transform 0.2s;
+}
+.avail-toggle.on::after{transform:translateX(20px);}
+
+/* CHARTS */
+.chart-bar-wrap{display:flex;flex-direction:column;gap:12px;}
+.chart-row-item{display:flex;align-items:center;gap:12px;}
+.chart-row-label{font-size:0.8rem;color:var(--light);min-width:140px;}
+.chart-bar-track{flex:1;height:8px;background:var(--border);border-radius:4px;overflow:hidden;}
+.chart-bar-fill{height:100%;background:var(--red);border-radius:4px;transition:width 0.6s cubic-bezier(0.16,1,0.3,1);}
+.chart-bar-fill.gold{background:var(--gold);}
+.chart-bar-fill.green{background:var(--success);}
+.chart-bar-fill.blue{background:var(--blue);}
+.chart-val{font-family:'Space Mono',monospace;font-size:0.72rem;color:var(--gray);min-width:80px;text-align:right;}
+
+/* MODAL */
+.modal-overlay{
+  display:none;position:fixed;inset:0;z-index:500;
+  background:rgba(0,0,0,0.85);backdrop-filter:blur(8px);
+  align-items:center;justify-content:center;padding:20px;
+}
+.modal-overlay.open{display:flex;animation:fadeIn 0.2s ease;}
+@keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+.modal{
+  background:var(--dark);border:1px solid var(--border);
+  border-radius:14px;width:580px;max-width:100%;max-height:90vh;overflow-y:auto;
+  animation:modalIn 0.25s cubic-bezier(0.16,1,0.3,1);
+}
+@keyframes modalIn{from{transform:scale(0.94) translateY(20px);}to{transform:none;}}
+.modal-hdr{
+  padding:24px 28px 20px;
+  display:flex;align-items:center;justify-content:space-between;
+  border-bottom:1px solid var(--border);
+}
+.modal-hdr h3{font-family:'Bebas Neue',sans-serif;font-size:1.6rem;letter-spacing:2px;}
+.modal-close{background:none;border:none;color:var(--gray);font-size:1.4rem;cursor:pointer;transition:color 0.2s;padding:4px;}
+.modal-close:hover{color:var(--red);}
+.modal-body{padding:24px 28px 28px;}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.form-group{margin-bottom:18px;}
+.form-group label{display:block;font-family:'Space Mono',monospace;font-size:0.6rem;letter-spacing:2px;text-transform:uppercase;color:var(--gray);margin-bottom:7px;}
+.form-group input,.form-group select,.form-group textarea{
+  width:100%;background:var(--card);border:1px solid var(--border);border-radius:6px;
+  color:var(--white);font-family:'DM Sans',sans-serif;font-size:0.9rem;padding:11px 14px;
+  outline:none;transition:border-color 0.2s;appearance:none;
+}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--red);}
+.form-group select option{background:var(--card);}
+.form-group textarea{resize:vertical;min-height:80px;}
+.modal-footer{display:flex;justify-content:flex-end;gap:10px;padding-top:4px;}
+
+/* GRID LAYOUTS */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px;}
+.three-col{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:20px;}
+
+/* ACTIVITY LOG */
+.log-item{
+  display:flex;align-items:flex-start;gap:14px;
+  padding:14px 0;border-bottom:1px solid rgba(42,42,42,0.5);
+}
+.log-item:last-child{border-bottom:none;}
+.log-icon{
+  width:34px;height:34px;border-radius:8px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;font-size:0.9rem;
+}
+.log-icon.login{background:var(--blue-dim);}
+.log-icon.booking{background:var(--success-dim);}
+.log-icon.cancel{background:var(--red-dim);}
+.log-icon.admin{background:var(--gold-dim);}
+.log-icon.refund{background:var(--warning-dim);}
+.log-info{flex:1;}
+.log-action{font-size:0.85rem;color:var(--white);font-weight:500;}
+.log-meta{font-size:0.75rem;color:var(--gray);margin-top:3px;}
+.log-time{font-family:'Space Mono',monospace;font-size:0.65rem;color:var(--gray);white-space:nowrap;}
+
+/* REFUND CARD */
+.refund-item{
+  background:var(--card);border:1px solid var(--border);border-radius:8px;
+  padding:18px 22px;margin-bottom:12px;transition:border-color 0.2s;
+}
+.refund-item:hover{border-color:var(--border2);}
+.refund-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px;}
+.refund-id{font-family:'Space Mono',monospace;font-size:0.75rem;color:var(--red);}
+.refund-car{font-size:1rem;font-weight:700;color:var(--white);}
+.refund-user{font-size:0.8rem;color:var(--gray);margin-top:4px;}
+.refund-amount{font-family:'Bebas Neue',sans-serif;font-size:1.8rem;color:var(--gold);}
+.refund-actions{display:flex;gap:8px;}
+
+/* ABOUT PAGE */
+.about-hero{
+  background:linear-gradient(135deg,#1a0505,#181818);
+  border:1px solid var(--border);border-radius:12px;
+  padding:40px;margin-bottom:24px;position:relative;overflow:hidden;
+}
+.about-hero::after{
+  content:'VELOCE';position:absolute;right:-20px;bottom:-30px;
+  font-family:'Bebas Neue',sans-serif;font-size:8rem;letter-spacing:10px;
+  color:rgba(255,255,255,0.03);pointer-events:none;line-height:1;
+}
+.about-tagline{font-family:'Space Mono',monospace;font-size:0.7rem;letter-spacing:4px;color:var(--red);text-transform:uppercase;margin-bottom:12px;}
+.about-title{font-family:'Bebas Neue',sans-serif;font-size:3.2rem;letter-spacing:4px;color:var(--white);line-height:1;margin-bottom:16px;}
+.about-title span{color:var(--red);}
+.about-desc{font-size:0.95rem;color:var(--gray);line-height:1.8;max-width:600px;}
+.about-stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px;}
+.about-stat{
+  background:var(--card);border:1px solid var(--border);border-radius:10px;
+  padding:20px;text-align:center;
+}
+.about-stat-num{font-family:'Bebas Neue',sans-serif;font-size:2.4rem;color:var(--red);line-height:1;}
+.about-stat-lbl{font-size:0.72rem;color:var(--gray);text-transform:uppercase;letter-spacing:1.5px;margin-top:6px;}
+.team-card{
+  background:var(--card);border:1px solid var(--border);border-radius:10px;
+  padding:22px;text-align:center;transition:border-color 0.2s;
+}
+.team-card:hover{border-color:rgba(230,48,48,0.3);}
+.team-avatar{
+  width:56px;height:56px;border-radius:50%;margin:0 auto 12px;
+  background:linear-gradient(135deg,var(--red),#a00);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Space Mono',monospace;font-size:1rem;font-weight:700;
+  border:2px solid rgba(230,48,48,0.3);
+}
+.team-name{font-weight:700;color:var(--white);font-size:0.95rem;}
+.team-role{font-size:0.75rem;color:var(--gray);margin-top:4px;}
+.team-badge{
+  display:inline-block;margin-top:8px;
+  font-family:'Space Mono',monospace;font-size:0.6rem;letter-spacing:1px;
+  padding:3px 10px;border-radius:3px;
+  background:rgba(230,48,48,0.1);color:var(--red);border:1px solid rgba(230,48,48,0.2);
+}
+
+/* CAR GRID (Fleet Panel) */
+.fleet-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px;}
+.fleet-card{
+  background:var(--card);border:1px solid var(--border);border-radius:10px;
+  overflow:hidden;transition:all 0.25s;position:relative;
+}
+.fleet-card:hover{border-color:rgba(230,48,48,0.3);transform:translateY(-3px);box-shadow:0 12px 40px rgba(0,0,0,0.4);}
+.fleet-card-img{height:160px;overflow:hidden;position:relative;}
+.fleet-card-img img{width:100%;height:100%;object-fit:cover;transition:transform 0.4s;}
+.fleet-card:hover .fleet-card-img img{transform:scale(1.05);}
+.fleet-card-img-overlay{position:absolute;bottom:0;left:0;right:0;height:60px;background:linear-gradient(transparent,var(--card));}
+.fleet-card-body{padding:16px;}
+.fleet-card-cls{font-family:'Space Mono',monospace;font-size:0.6rem;color:var(--red);letter-spacing:3px;text-transform:uppercase;margin-bottom:4px;}
+.fleet-card-name{font-size:1rem;font-weight:700;color:var(--white);margin-bottom:2px;}
+.fleet-card-sub{font-size:0.75rem;color:var(--gray);margin-bottom:12px;}
+.fleet-card-specs{display:flex;gap:12px;padding:10px 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border);margin-bottom:12px;}
+.fc-spec{flex:1;text-align:center;}
+.fc-spec-val{font-family:'Space Mono',monospace;font-size:0.72rem;color:var(--white);}
+.fc-spec-lbl{font-size:0.58rem;color:var(--gray);text-transform:uppercase;letter-spacing:1px;margin-top:2px;}
+.fleet-card-footer{display:flex;align-items:center;justify-content:space-between;}
+.fleet-price{font-family:'Bebas Neue',sans-serif;font-size:1.6rem;color:var(--gold);}
+.fleet-price span{font-size:0.75rem;color:var(--gray);font-family:'DM Sans',sans-serif;}
+.fleet-card-actions{display:flex;gap:6px;}
+.fleet-avail-badge{
+  position:absolute;top:10px;right:10px;
+  padding:3px 10px;border-radius:3px;
+  font-family:'Space Mono',monospace;font-size:0.58rem;font-weight:700;letter-spacing:1px;
+  text-transform:uppercase;z-index:2;
+}
+.fleet-avail-badge.on{background:rgba(46,204,113,0.15);color:var(--success);border:1px solid rgba(46,204,113,0.3);}
+.fleet-avail-badge.off{background:rgba(230,48,48,0.15);color:var(--red);border:1px solid rgba(230,48,48,0.3);}
+
+/* EMPTY STATE */
+.empty-state{text-align:center;padding:60px 20px;}
+.empty-state .icon{font-size:3rem;margin-bottom:16px;opacity:0.4;}
+.empty-state p{font-size:0.9rem;color:var(--gray);}
+
+/* TOAST */
+.toast{
+  position:fixed;bottom:28px;right:28px;
+  background:var(--dark);border:1px solid var(--border);
+  padding:14px 22px;border-radius:8px;
+  font-size:0.85rem;font-family:'DM Sans',sans-serif;
+  z-index:9999;display:none;
+  box-shadow:0 8px 32px rgba(0,0,0,0.6);
+  max-width:340px;line-height:1.5;
+}
+.toast.show{display:flex;align-items:flex-start;gap:10px;animation:slideUp 0.3s ease;}
+.toast.ok{border-color:rgba(46,204,113,0.4);color:var(--success);}
+.toast.err{border-color:rgba(230,48,48,0.4);color:var(--red);}
+.toast.info{border-color:rgba(74,158,255,0.4);color:var(--blue);}
+@keyframes slideUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:none;}}
+
+/* FILTER CHIPS */
+.filter-row{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;}
+.chip{
+  padding:7px 16px;border-radius:20px;border:1px solid var(--border);
+  background:transparent;color:var(--gray);font-family:'DM Sans',sans-serif;
+  font-size:0.8rem;cursor:pointer;transition:all 0.2s;
+}
+.chip:hover,.chip.active{border-color:var(--red);color:var(--red);background:rgba(230,48,48,0.08);}
+
+/* DIVIDER */
+.section-divider{height:1px;background:var(--border);margin:28px 0;}
+.section-title{font-family:'Bebas Neue',sans-serif;font-size:1.6rem;letter-spacing:2px;color:var(--white);margin-bottom:16px;}
+
+/* VIEW SWITCHER */
+.view-switch{display:flex;border:1px solid var(--border);border-radius:6px;overflow:hidden;}
+.view-switch-btn{
+  padding:7px 12px;background:none;border:none;cursor:pointer;
+  color:var(--gray);font-size:1rem;transition:all 0.15s;
+}
+.view-switch-btn.active{background:var(--red);color:white;}
+
+/* SCROLLABLE TABLE */
+.scroll-table{overflow-x:auto;}
+
+/* INFO CARDS */
+.info-card{
+  background:var(--card);border:1px solid var(--border);border-radius:10px;
+  padding:22px 24px;
+}
+.info-card-title{font-family:'Space Mono',monospace;font-size:0.65rem;letter-spacing:2px;text-transform:uppercase;color:var(--gray);margin-bottom:12px;}
+
+/* PROGRESS */
+.progress-row{display:flex;align-items:center;gap:12px;margin-bottom:12px;}
+.progress-label{font-size:0.8rem;color:var(--light);min-width:120px;}
+.progress-bar{flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden;}
+.progress-fill{height:100%;border-radius:3px;transition:width 0.6s cubic-bezier(0.16,1,0.3,1);}
+.progress-val{font-family:'Space Mono',monospace;font-size:0.7rem;color:var(--gray);min-width:40px;text-align:right;}
+
+/* TABS */
+.tab-bar{display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:24px;}
+.tab-btn{
+  padding:10px 22px;background:none;border:none;border-bottom:2px solid transparent;
+  color:var(--gray);font-family:'DM Sans',sans-serif;font-size:0.85rem;font-weight:500;
+  cursor:pointer;transition:all 0.2s;margin-bottom:-1px;
+}
+.tab-btn.active{color:var(--red);border-bottom-color:var(--red);}
+.tab-btn:hover:not(.active){color:var(--light);}
+.tab-panel{display:none;}
+.tab-panel.active{display:block;}
+
+/* RESPONSIVE */
+@media(max-width:900px){
+  .sidebar{transform:translateX(-100%);}
+  .sidebar.open{transform:none;}
+  .main-content{margin-left:0;}
+  .kpi-grid{grid-template-columns:repeat(2,1fr);}
+  .two-col,.three-col,.about-stat-grid{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════
+     LOGIN SCREEN
+══════════════════════════════════════════ -->
+<div id="loginScreen">
+  <div class="login-box">
+    <div class="login-top">
+      <div class="login-logo">VELO<span>CE</span></div>
+      <div class="login-badge">⚙️ Admin Command Center</div>
+    </div>
+    <div class="login-body">
+      <div class="login-title">ADMIN ACCESS</div>
+      <div class="login-sub">Restricted area. Enter your administrator credentials to continue.</div>
+      <div class="form-group">
+        <label>Administrator Email</label>
+        <input type="email" id="loginEmail" placeholder="admin@veloce.in" autocomplete="off">
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="loginPass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()">
+      </div>
+      <button class="login-btn" onclick="doLogin()">🔑 &nbsp;Access Dashboard</button>
+      <div class="login-error" id="loginError">⛔ Invalid credentials. Access denied.</div>
+      <div class="auth-footer-text" style="margin-top:10px"><a href="/signup" style="color:var(--gray)">←Signup </a></div>
+      
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     APP SHELL
+══════════════════════════════════════════ -->
+<div id="appShell">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div>
+        <div class="sidebar-logo-text">VELO<span>CE</span></div>
+      </div>
+      <div class="sidebar-logo-badge">ADMIN</div>
+    </div>
+
+    <div class="sidebar-admin-info">
+      <div class="admin-avatar" id="adminAvatar">AD</div>
+      <div>
+        <div class="admin-name" id="adminName">Admin</div>
+        <div class="admin-role">SUPER ADMIN</div>
+        <div class="admin-online">Online</div>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Main</div>
+      <button class="nav-item active" onclick="showPanel('dashboard',this)" id="nav-dashboard">
+        <span class="nav-icon">📊</span> Dashboard
+      </button>
+      <button class="nav-item" onclick="showPanel('fleet',this)">
+        <span class="nav-icon">🚗</span> Fleet Management
+      </button>
+      <button class="nav-item" onclick="showPanel('bookings',this)">
+        <span class="nav-icon">📋</span> Bookings
+        <span class="nav-badge" id="booking-count-badge">0</span>
+      </button>
+      <button class="nav-item" onclick="showPanel('refunds',this)">
+        <span class="nav-icon">💰</span> Refund Requests
+        <span class="nav-badge gold" id="refund-count-badge" style="display:none">0</span>
+      </button>
+
+      <div class="nav-section-label" style="margin-top:10px;">Monitoring</div>
+      <button class="nav-item" onclick="showPanel('users',this)">
+        <span class="nav-icon">👥</span> Users
+      </button>
+      <button class="nav-item" onclick="showPanel('availability',this)">
+        <span class="nav-icon">✅</span> Availability
+      </button>
+      <button class="nav-item" onclick="showPanel('logs',this)">
+        <span class="nav-icon">📜</span> Activity Logs
+      </button>
+
+      <div class="nav-section-label" style="margin-top:10px;">System</div>
+      <button class="nav-item" onclick="showPanel('about',this)">
+        <span class="nav-icon">ℹ️</span> About
+      </button>
+    </nav>
+    <div class="sidebar-footer">
+      <button class="/signup" onclick="doLogout()">🚪 &nbsp;Logout</button>
+    </div>
+    </aside>
+
+  
+
+  <!-- MAIN CONTENT -->
+  <div class="main-content">
+    <div class="topbar">
+      <div>
+        <span class="topbar-title" id="topbarTitle">DASHBOARD</span>
+        <span class="topbar-sub" id="topbarSub">Overview & Analytics</span>
+      </div>
+      <div class="topbar-right">
+        <span class="topbar-time" id="clock"></span>
+        <div class="topbar-notify" title="Notifications">
+          🔔<span class="notify-dot"></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="page-content">
+
+      <!-- ══ DASHBOARD ══ -->
+      <div class="panel active" id="panel-dashboard">
+        <div class="kpi-grid">
+          <div class="kpi-card" style="--kpi-color:var(--gold)">
+            <div class="kpi-icon">₹</div>
+            <div class="kpi-label">Total Revenue</div>
+            <div class="kpi-value gold" id="kpi-revenue">₹0</div>
+            <div class="kpi-change up" id="kpi-rev-change">All time earnings</div>
+          </div>
+          <div class="kpi-card" style="--kpi-color:var(--success)">
+            <div class="kpi-icon">📋</div>
+            <div class="kpi-label">Total Bookings</div>
+            <div class="kpi-value green" id="kpi-bookings">0</div>
+            <div class="kpi-change">Lifetime bookings</div>
+          </div>
+          <div class="kpi-card" style="--kpi-color:var(--success)">
+            <div class="kpi-icon">✅</div>
+            <div class="kpi-label">Cars Available</div>
+            <div class="kpi-value green" id="kpi-available">0</div>
+            <div class="kpi-change" id="kpi-avail-pct">of fleet</div>
+          </div>
+          <div class="kpi-card" style="--kpi-color:var(--red)">
+            <div class="kpi-icon">🔴</div>
+            <div class="kpi-label">Currently Booked</div>
+            <div class="kpi-value red" id="kpi-booked">0</div>
+            <div class="kpi-change">Active rentals</div>
+          </div>
+        </div>
+
+        <div class="two-col">
+          <!-- Recent Bookings -->
+          <div class="table-wrap" style="grid-column:1/-1">
+            <div class="table-header">
+              <span class="table-title">Recent Bookings</span>
+              <button class="btn btn-outline btn-sm" onclick="showPanel('bookings',document.querySelector('[onclick*=bookings]'))">View All →</button>
+            </div>
+            <div class="scroll-table">
+              <table>
+                <thead><tr>
+                  <th>ID</th><th>Vehicle</th><th>Customer</th><th>Dates</th><th>Amount</th><th>Status</th>
+                </tr></thead>
+                <tbody id="recent-body">
+                  <tr><td colspan="6" style="text-align:center;color:var(--gray);padding:32px">No bookings yet.</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div class="two-col">
+          <!-- Fleet by Category -->
+          <div class="info-card">
+            <div class="info-card-title">Fleet by Category</div>
+            <div id="cat-breakdown"></div>
+          </div>
+          <!-- Top Customers -->
+          <div class="info-card">
+            <div class="info-card-title">Top Customers</div>
+            <div id="top-customers"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ FLEET MANAGEMENT ══ -->
+      <div class="panel" id="panel-fleet">
+        <div class="page-header">
+          <div class="page-header-left">
+            <h1>FLEET MANAGEMENT</h1>
+            <p>Add, edit, and manage your vehicle inventory</p>
+          </div>
+          <div class="page-header-right">
+            <div class="view-switch">
+              <button class="view-switch-btn active" onclick="setFleetView('grid',this)" title="Grid">⊞</button>
+              <button class="view-switch-btn" onclick="setFleetView('table',this)" title="Table">☰</button>
+            </div>
+            <button class="btn btn-red" onclick="openCarModal()">+ Add Car</button>
+          </div>
+        </div>
+
+        <div class="filter-row" id="fleet-filters">
+          <button class="chip active" onclick="filterFleet('All',this)">All</button>
+          <button class="chip" onclick="filterFleet('Sport',this)">Sport</button>
+          <button class="chip" onclick="filterFleet('Luxury',this)">Luxury</button>
+          <button class="chip" onclick="filterFleet('SUV',this)">SUV</button>
+          <button class="chip" onclick="filterFleet('Sedan',this)">Sedan</button>
+          <button class="chip" onclick="filterFleet('Electric',this)">Electric</button>
+        </div>
+
+        <!-- Grid View -->
+        <div id="fleet-grid-view">
+          <div class="fleet-grid" id="fleet-grid"></div>
+        </div>
+
+        <!-- Table View -->
+        <div id="fleet-table-view" style="display:none">
+          <div class="table-wrap">
+            <div class="table-header">
+              <span class="table-title">All Vehicles</span>
+              <div class="search-box">🔍 <input id="fleet-search" placeholder="Search cars..." oninput="renderFleetTable()"></div>
+            </div>
+            <div class="scroll-table">
+              <table>
+                <thead><tr>
+                  <th>Photo</th><th>Vehicle</th><th>Category</th><th>Specs</th><th>Daily Rate</th><th>Status</th><th>Actions</th>
+                </tr></thead>
+                <tbody id="fleet-table-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ BOOKINGS ══ -->
+      <div class="panel" id="panel-bookings">
+        <div class="page-header">
+          <div class="page-header-left">
+            <h1>BOOKING MANAGEMENT</h1>
+            <p>All reservations and their current status</p>
+          </div>
+          <div class="page-header-right">
+            <button class="btn btn-outline btn-sm" onclick="exportBookings()">⬇ Export CSV</button>
+          </div>
+        </div>
+        <div class="filter-row">
+          <button class="chip active" onclick="filterBookings('all',this)">All</button>
+          <button class="chip" onclick="filterBookings('upcoming',this)">Upcoming</button>
+          <button class="chip" onclick="filterBookings('active',this)">Active</button>
+          <button class="chip" onclick="filterBookings('completed',this)">Completed</button>
+          <button class="chip" onclick="filterBookings('cancelled',this)">Cancelled</button>
+        </div>
+        <div class="table-wrap">
+          <div class="table-header">
+            <span class="table-title">All Bookings</span>
+            <div class="search-box">🔍 <input id="booking-search" placeholder="Search bookings..." oninput="renderBookingsTable()"></div>
+          </div>
+          <div class="scroll-table">
+            <table>
+              <thead><tr>
+                <th>Booking ID</th><th>Vehicle</th><th>Customer</th><th>Pick-up</th><th>Return</th><th>Amount</th><th>Status</th><th>Actions</th>
+              </tr></thead>
+              <tbody id="bookings-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ REFUNDS ══ -->
+      <div class="panel" id="panel-refunds">
+        <div class="page-header">
+          <div class="page-header-left">
+            <h1>REFUND REQUESTS</h1>
+            <p>Review and approve cancellation refunds</p>
+          </div>
+        </div>
+        <div class="tab-bar">
+          <button class="tab-btn active" onclick="switchRefundTab('pending',this)">Pending <span id="pending-cnt"></span></button>
+          <button class="tab-btn" onclick="switchRefundTab('approved',this)">Approved</button>
+          <button class="tab-btn" onclick="switchRefundTab('rejected',this)">Rejected</button>
+        </div>
+        <div class="tab-panel active" id="refund-pending"></div>
+        <div class="tab-panel" id="refund-approved"></div>
+        <div class="tab-panel" id="refund-rejected"></div>
+      </div>
+
+      <!-- ══ USERS ══ -->
+      <div class="panel" id="panel-users">
+        <div class="page-header">
+          <div class="page-header-left">
+            <h1>USER MANAGEMENT</h1>
+            <p>Customer activity, booking history, and profiles</p>
+          </div>
+        </div>
+        <div class="two-col" style="margin-bottom:20px">
+          <div class="kpi-card">
+            <div class="kpi-label">Registered Users</div>
+            <div class="kpi-value blue" id="user-total">0</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Active Customers</div>
+            <div class="kpi-value green" id="user-active">0</div>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <div class="table-header">
+            <span class="table-title">Customer Directory</span>
+            <div class="search-box">🔍 <input id="user-search" placeholder="Search users..." oninput="renderUsersTable()"></div>
+          </div>
+          <div class="scroll-table">
+            <table>
+              <thead><tr>
+                <th>Customer</th><th>Email</th><th>Phone</th><th>Bookings</th><th>Total Spent</th><th>Last Action</th><th>Tier</th>
+              </tr></thead>
+              <tbody id="users-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="section-divider"></div>
+        <div class="section-title">Recent User Activity</div>
+        <div class="table-wrap">
+          <div class="scroll-table">
+            <table>
+              <thead><tr>
+                <th>User</th><th>Action</th><th>Details</th><th>Timestamp</th>
+              </tr></thead>
+              <tbody id="activity-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ AVAILABILITY ══ -->
+      <div class="panel" id="panel-availability">
+        <div class="page-header">
+          <div class="page-header-left">
+            <h1>AVAILABILITY CONTROL</h1>
+            <p>Toggle car availability status in real-time</p>
+          </div>
+          <div class="page-header-right">
+            <button class="btn btn-outline btn-sm" onclick="setAllAvail(true)">✅ All Available</button>
+            <button class="btn btn-outline btn-sm" onclick="setAllAvail(false)">🔴 All Unavailable</button>
+          </div>
+        </div>
+        <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr)">
+          <div class="kpi-card">
+            <div class="kpi-label">Available</div>
+            <div class="kpi-value green" id="av-available">0</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Booked / Unavailable</div>
+            <div class="kpi-value red" id="av-booked">0</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Utilization Rate</div>
+            <div class="kpi-value gold" id="av-rate">0%</div>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <div class="table-header">
+            <span class="table-title">Vehicle Status</span>
+            <div class="filter-row" style="margin:0">
+              <button class="chip active" onclick="filterAvail('all',this)" style="padding:5px 12px;font-size:0.75rem">All</button>
+              <button class="chip" onclick="filterAvail('available',this)" style="padding:5px 12px;font-size:0.75rem">Available</button>
+              <button class="chip" onclick="filterAvail('booked',this)" style="padding:5px 12px;font-size:0.75rem">Booked</button>
+            </div>
+          </div>
+          <div class="scroll-table">
+            <table>
+              <thead><tr>
+                <th>Photo</th><th>Vehicle</th><th>Category</th><th>Daily Rate</th><th>Status</th><th>Toggle</th>
+              </tr></thead>
+              <tbody id="avail-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ LOGS ══ -->
+      <div class="panel" id="panel-logs">
+        <div class="page-header">
+          <div class="page-header-left">
+            <h1>ACTIVITY LOGS</h1>
+            <p>Full audit trail of system events</p>
+          </div>
+          <div class="page-header-right">
+            <button class="btn btn-outline btn-sm" onclick="clearLogs()">🗑 Clear Logs</button>
+          </div>
+        </div>
+        <div class="filter-row">
+          <button class="chip active" onclick="filterLogs('all',this)">All Events</button>
+          <button class="chip" onclick="filterLogs('login',this)">🔑 Logins</button>
+          <button class="chip" onclick="filterLogs('booking',this)">📋 Bookings</button>
+          <button class="chip" onclick="filterLogs('cancel',this)">❌ Cancellations</button>
+          <button class="chip" onclick="filterLogs('admin',this)">⚙️ Admin</button>
+          <button class="chip" onclick="filterLogs('refund',this)">💰 Refunds</button>
+        </div>
+        <div class="table-wrap">
+          <div class="scroll-table">
+            <table>
+              <thead><tr>
+                <th>Type</th><th>Event</th><th>User / Entity</th><th>Details</th><th>Timestamp</th>
+              </tr></thead>
+              <tbody id="logs-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ ABOUT ══ -->
+      <div class="panel" id="panel-about">
+        <div class="about-hero">
+          <div class="about-tagline">● Premium Car Rental Platform</div>
+          <div class="about-title">VELO<span>CE</span><br>HYDERABAD</div>
+          <div class="about-desc">Veloce is Hyderabad's premier luxury and everyday car rental platform, offering a curated fleet of 48+ vehicles from economy sedans to hypercar exotica. Founded with a mission to redefine mobility, Veloce delivers seamless, technology-driven rental experiences for every journey.</div>
+        </div>
+
+        <div class="about-stat-grid">
+          <div class="about-stat"><div class="about-stat-num">48</div><div class="about-stat-lbl">Total Vehicles</div></div>
+          <div class="about-stat"><div class="about-stat-num">6</div><div class="about-stat-lbl">Categories</div></div>
+          <div class="about-stat"><div class="about-stat-num">2</div><div class="about-stat-lbl">Admins</div></div>
+          <div class="about-stat"><div class="about-stat-num">24/7</div><div class="about-stat-lbl">Support</div></div>
+        </div>
+
+        <div class="section-title">Admin Team</div>
+        <div class="three-col">
+          <div class="team-card">
+            <div class="team-avatar">MR</div>
+            <div class="team-name">Madhan Reddy</div>
+            <div class="team-role">Lead Administrator</div>
+            <div class="team-badge">SUPER ADMIN</div>
+            <div style="margin-top:10px;font-size:0.75rem;color:var(--gray)">madhanreddy466@gmail.com</div>
+          </div>
+          <div class="team-card">
+            <div class="team-avatar">SD</div>
+            <div class="team-name">Sudheer</div>
+            <div class="team-role">Operations Admin</div>
+            <div class="team-badge">SUPER ADMIN</div>
+            <div style="margin-top:10px;font-size:0.75rem;color:var(--gray)">sudheer@gmail.com</div>
+          </div>
+          <div class="team-card">
+            <div class="team-avatar">VL</div>
+            <div class="team-name">Veloce System</div>
+            <div class="team-role">Automated Bot</div>
+            <div class="team-badge" style="background:var(--blue-dim);color:var(--blue);border-color:rgba(74,158,255,0.2)">SYSTEM</div>
+            <div style="margin-top:10px;font-size:0.75rem;color:var(--gray)">system@veloce.in</div>
+          </div>
+        </div>
+
+        <div class="section-divider"></div>
+        <div class="section-title">Technology Stack</div>
+        <div class="two-col">
+          <div class="info-card">
+            <div class="info-card-title">Frontend</div>
+            <div class="chart-bar-wrap">
+              <div class="progress-row"><span class="progress-label">HTML5 / CSS3</span><div class="progress-bar"><div class="progress-fill" style="width:95%;background:var(--red)"></div></div><span class="progress-val">95%</span></div>
+              <div class="progress-row"><span class="progress-label">JavaScript ES6</span><div class="progress-bar"><div class="progress-fill" style="width:90%;background:var(--gold)"></div></div><span class="progress-val">90%</span></div>
+              <div class="progress-row"><span class="progress-label">Responsive Design</span><div class="progress-bar"><div class="progress-fill" style="width:100%;background:var(--success)"></div></div><span class="progress-val">100%</span></div>
+            </div>
+          </div>
+          <div class="info-card">
+            <div class="info-card-title">System Info</div>
+            <div style="display:flex;flex-direction:column;gap:10px">
+              <div style="display:flex;justify-content:space-between;font-size:0.85rem"><span style="color:var(--gray)">Version</span><span style="font-family:'Space Mono',monospace;color:var(--white)">v2.4.1</span></div>
+              <div style="display:flex;justify-content:space-between;font-size:0.85rem"><span style="color:var(--gray)">Storage</span><span style="font-family:'Space Mono',monospace;color:var(--white)">localStorage</span></div>
+              <div style="display:flex;justify-content:space-between;font-size:0.85rem"><span style="color:var(--gray)">Auth</span><span style="font-family:'Space Mono',monospace;color:var(--white)">Session-based</span></div>
+              <div style="display:flex;justify-content:space-between;font-size:0.85rem"><span style="color:var(--gray)">Location</span><span style="font-family:'Space Mono',monospace;color:var(--white)">Hyderabad, IN</span></div>
+              <div style="display:flex;justify-content:space-between;font-size:0.85rem"><span style="color:var(--gray)">Support</span><span style="font-family:'Space Mono',monospace;color:var(--success)">24/7 Active</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-divider"></div>
+        <div class="section-title">Contact & Support</div>
+        <div class="info-card" style="background:linear-gradient(135deg,#1a0505,#181818)">
+          <div style="display:flex;flex-wrap:wrap;gap:32px">
+            <div><div style="font-size:0.65rem;color:var(--gray);font-family:'Space Mono',monospace;letter-spacing:2px;text-transform:uppercase;margin-bottom:6px">📍 Address</div><div style="font-size:0.9rem;color:var(--light)">Road No. 12, Banjara Hills<br>Hyderabad, Telangana 500034</div></div>
+            <div><div style="font-size:0.65rem;color:var(--gray);font-family:'Space Mono',monospace;letter-spacing:2px;text-transform:uppercase;margin-bottom:6px">📞 Phone</div><div style="font-size:0.9rem;color:var(--light)">+91 40 1234 5678<br>+91 98765 43210</div></div>
+            <div><div style="font-size:0.65rem;color:var(--gray);font-family:'Space Mono',monospace;letter-spacing:2px;text-transform:uppercase;margin-bottom:6px">✉️ Email</div><div style="font-size:0.9rem;color:var(--light)">info@veloce.in<br>support@veloce.in</div></div>
+            <div><div style="font-size:0.65rem;color:var(--gray);font-family:'Space Mono',monospace;letter-spacing:2px;text-transform:uppercase;margin-bottom:6px">⏰ Hours</div><div style="font-size:0.9rem;color:var(--light)">Mon–Sun<br>6:00 AM – 11:00 PM</div></div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- end page-content -->
+  </div><!-- end main-content -->
+</div><!-- end appShell -->
+
+<!-- ADD / EDIT CAR MODAL -->
+<div class="modal-overlay" id="carModal">
+  <div class="modal">
+    <div class="modal-hdr">
+      <h3 id="carModalTitle">ADD NEW VEHICLE</h3>
+      <button class="modal-close" onclick="closeCarModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="editCarId" value="">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Car Name *</label>
+          <input id="cm-name" placeholder="e.g. Ferrari 488 GTB">
+        </div>
+        <div class="form-group">
+          <label>Sub-title</label>
+          <input id="cm-sub" placeholder="e.g. 2024 · V8 Turbo">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Category *</label>
+          <select id="cm-cls">
+            <option value="Sport">Sport</option>
+            <option value="Luxury">Luxury</option>
+            <option value="SUV">SUV</option>
+            <option value="Sedan">Sedan</option>
+            <option value="Electric">Electric</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Daily Rate (₹) *</label>
+          <input id="cm-daily" type="number" placeholder="e.g. 5000">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Seats</label>
+          <input id="cm-seats" type="number" placeholder="5" value="5">
+        </div>
+        <div class="form-group">
+          <label>Fuel Type</label>
+          <select id="cm-fuel">
+            <option>Petrol</option><option>Diesel</option>
+            <option>Electric</option><option>Hybrid</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Transmission</label>
+          <select id="cm-trans"><option>Auto</option><option>Manual</option></select>
+        </div>
+        <div class="form-group">
+          <label>Emoji</label>
+          <input id="cm-emoji" placeholder="🚗" maxlength="4">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Image URL</label>
+        <input id="cm-img" placeholder="https://images.unsplash.com/...">
+      </div>
+      <div class="form-group">
+        <label>Availability</label>
+        <select id="cm-avail">
+          <option value="1">Available</option>
+          <option value="0">Not Available</option>
+        </select>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" onclick="closeCarModal()">Cancel</button>
+        <button class="btn btn-red" onclick="saveCar()">💾 Save Vehicle</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+/* ══════════════════════════════════════════════════════
+   CARS DATA
+══════════════════════════════════════════════════════ */
+const BASE_CARS = [
+	  { id: 1, name: "Ferrari 488 GTB", sub: "2023 • V8 Turbo", cls: "Sport", emoji: "🏎️", img: "https://images.unsplash.com/photo-1592198084033-aade902d1aae?w=600&h=280&fit=crop&q=80", seats: 2, fuel: "Petrol", trans: "Auto", daily: 8500 },
+      { id: 2, name: "Mercedes S-Class", sub: "2024 • AMG Line", cls: "Luxury", emoji: "🚘", img: "https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?w=600&h=280&fit=crop&q=80", seats: 5, fuel: "Diesel", trans: "Auto", daily: 5500 },
+      { id: 3, name: "Porsche Cayenne", sub: "2023 • Turbo S", cls: "SUV", emoji: "🚙", img: "https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=600&h=280&fit=crop&q=80", seats: 5, fuel: "Petrol", trans: "Auto", daily: 6500 },
+      { id: 4, name: "BMW M4 Competition", sub: "2023 • Twin Turbo", cls: "Sport", emoji: "🚗", img: "https://images.unsplash.com/photo-1555215695-3004980ad54e?w=600&h=280&fit=crop&q=80", seats: 4, fuel: "Petrol", trans: "Manual", daily: 7200 },
+      { id: 5, name: "Tesla Model S", sub: "2024 • Plaid", cls: "Electric", emoji: "⚡", img: "https://images.unsplash.com/photo-1560958089-b8a1929cea89?w=600&h=280&fit=crop&q=80", seats: 5, fuel: "Electric", trans: "Auto", daily: 5000 },
+      { id: 6, name: "Range Rover Sport", sub: "2024 • HSE", cls: "SUV", emoji: "🏔️", img: "https://images.unsplash.com/photo-1606016159991-dfe4f2746ad5?w=600&h=280&fit=crop&q=80", seats: 7, fuel: "Diesel", trans: "Auto", daily: 7800 },
+      { id: 7, name: "Audi A8 L", sub: "2023 • TDI Quattro", cls: "Luxury", emoji: "🎩", img: "https://images.unsplash.com/photo-1606152421802-db97b9c7a11b?w=600&h=280&fit=crop&q=80", seats: 5, fuel: "Diesel", trans: "Auto", daily: 4800 },
+      { id: 8, name: "Lamborghini Urus", sub: "2024 • Performante", cls: "SUV", emoji: "🦁", img: "https://images.unsplash.com/photo-1544636331-e26879cd4d9b?w=600&h=280&fit=crop&q=80", seats: 5, fuel: "Petrol", trans: "Auto", daily: 12000 },
+      { id: 9, name: "Hyundai Creta", sub: "2024 • SX Turbo", cls: "SUV", emoji: "🌟", img: "https://images.unsplash.com/photo-1609521263047-f8f205293f24?w=600&h=280&fit=crop&q=80", seats: 5, fuel: "Petrol", trans: "Auto", daily: 1800 },
+      { id: 10, name: "Toyota Camry", sub: "2024 • Hybrid", cls: "Sedan", emoji: "🍃", img: "https://images.unsplash.com/photo-1621007947382-bb3c3994e3fb?w=600&h=280&fit=crop&q=80", seats: 5, fuel: "Hybrid", trans: "Auto", daily: 2400 },
+      { id:11, name:"Tata Nexon EV",          sub:"2024 • Max Long Range",        cls:"Electric",emoji:"🔋", img:"https://images.pexels.com/photos/9031387/pexels-photo-9031387.jpeg", seats:5, fuel:"Electric", trans:"Auto",   daily:1600  },
+      { id: 12, name: "Honda City", sub: "2024 • ZX CVT", cls: "Sedan", emoji: "🚕", img: "https://images.unsplash.com/photo-1617469767053-d3b523a0b982?w=600&h=280&fit=crop&q=80", seats: 5, fuel: "Petrol", trans: "Auto", daily: 1400 },
+      { id: 13, name: "Rolls-Royce Ghost", sub: "2024 • Extended Wheelbase", cls: "Luxury", emoji: "👑", img: "https://images.unsplash.com/photo-1631295868223-63265b40d9e4?w=600&h=280&fit=crop&q=80", seats: 5, fuel: "Petrol", trans: "Auto", daily: 28000 },
+      { id: 14, name: "Bentley Continental GT", sub: "2023 • W12 Speed", cls: "Luxury", emoji: "🦅", img: "https://images.unsplash.com/photo-1580414057403-c5f451f30e1c?w=600&h=280&fit=crop&q=80", seats: 4, fuel: "Petrol", trans: "Auto", daily: 22000 },
+      { id:15, name:"McLaren 720S",           sub:"2023 • Spider",                cls:"Sport",   emoji:"🦋", img:"https://images.pexels.com/photos/29918150/pexels-photo-29918150.jpeg", seats:2, fuel:"Petrol",   trans:"Auto",   daily:16500 },
+      { id:16, name:"Bugatti Chiron",         sub:"2024 • Sport",                 cls:"Sport",   emoji:"🐝", img:"https://images.pexels.com/photos/12351384/pexels-photo-12351384.jpeg", seats:2, fuel:"Petrol",   trans:"Auto",   daily:45000 },
+      { id: 17, name: "Aston Martin DBX", sub: "2023 • 707", cls: "SUV", emoji: "🏰", img: "https://images.unsplash.com/photo-1580273916550-e323be2ae537?w=600&h=280&fit=crop&q=80", seats: 5, fuel: "Petrol", trans: "Auto", daily: 14000 },
+      { id: 18, name: "Porsche 911 GT3", sub: "2024 • RS Touring", cls: "Sport", emoji: "🐎", img: "https://images.unsplash.com/photo-1614162692292-7ac56d7f7f1e?w=600&h=280&fit=crop&q=80", seats: 2, fuel: "Petrol", trans: "Manual", daily: 13500 },
+      { id:19, name:"Tesla Model X",          sub:"2024 • Plaid AWD",             cls:"Electric",emoji:"🛸", img:"https://images.pexels.com/photos/28576666/pexels-photo-28576666.jpeg", seats:7, fuel:"Electric", trans:"Auto",   daily:6200  },
+      { id:20, name:"Rivian R1T",             sub:"2024 • Adventure",             cls:"SUV",     emoji:"⛺", img:"https://images.pexels.com/photos/35557255/pexels-photo-35557255.jpeg", seats:5, fuel:"Electric", trans:"Auto",   daily:5800  },
+      { id: 21, name: "Jeep Wrangler", sub: "2024 • Rubicon 4xe", cls: "SUV", emoji: "🏕️", img: "https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?w=600&h=280&fit=crop&q=80", seats: 5, fuel: "Hybrid", trans: "Auto", daily: 4200 },
+      { id: 22, name: "Ford Mustang GT500", sub: "2023 • Shelby", cls: "Sport", emoji: "🐴", img: "https://images.unsplash.com/photo-1547744152-14d985cb937f?w=600&h=280&fit=crop&q=80", seats: 4, fuel: "Petrol", trans: "Manual", daily: 9800 },
+      { id: 23, name: "Volkswagen Tiguan", sub: "2024 • R-Line", cls: "SUV", emoji: "🐯", img: "https://images.unsplash.com/photo-1504215680853-026ed2a45def?w=600&h=280&fit=crop&q=80", seats: 7, fuel: "Diesel", trans: "Auto", daily: 3200 },
+      { id: 24, name: "Kia EV6 GT", sub: "2024 • AWD", cls: "Electric", emoji: "⚡", img: "https://images.unsplash.com/photo-1629897048514-3dd7414fe72a?w=600&h=280&fit=crop&q=80", seats: 5, fuel: "Electric", trans: "Auto", daily: 3800 },
+      { id: 25, name: "Maserati GranTurismo", sub: "2024 • Folgore", cls: "Luxury", emoji: "🔱", img: "https://images.unsplash.com/photo-1563720223185-11003d516935?w=600&h=280&fit=crop&q=80", seats: 4, fuel: "Electric", trans: "Auto", daily: 18000 },
+      { id: 26, name: "Chevrolet Corvette", sub: "2024 • Z06 Convertible", cls: "Sport", emoji: "🌊", img: "https://images.unsplash.com/photo-1600712242805-5f78671b24da?w=600&h=280&fit=crop&q=80", seats: 2, fuel: "Petrol", trans: "Auto", daily: 11000 },
+      { id: 27, name: "Land Rover Defender", sub: "2024 • 130 X", cls: "SUV", emoji: "🦁", img: "https://images.unsplash.com/photo-1616422285623-13ff0162193c?w=600&h=280&fit=crop&q=80", seats: 8, fuel: "Diesel", trans: "Auto", daily: 8200 },
+      { id: 28, name: "Toyota Land Cruiser", sub: "2024 • GR Sport", cls: "SUV", emoji: "🏔️", img: "https://images.pexels.com/photos/18029607/pexels-photo-18029607.jpeg", seats: 7, fuel: "Diesel", trans: "Auto", daily: 6800 },
+      { id: 29, name: "BMW i7", sub: "2024 • M70 xDrive", cls: "Electric", emoji: "🌀", img: "https://images.pexels.com/photos/12365935/pexels-photo-12365935.jpeg", seats: 5, fuel: "Electric", trans: "Auto", daily: 9500 },
+      { id: 30, name: "Mercedes EQS AMG", sub: "2024 • 53 4MATIC+", cls: "Electric", emoji: "💎", img: "https://images.pexels.com/photos/29779238/pexels-photo-29779238.jpeg", seats: 5, fuel: "Electric", trans: "Auto", daily: 8800 },
+      { id: 31, name: "Maruti Suzuki Baleno", sub: "2024 • Alpha CVT", cls: "Sedan", emoji: "🌸", img: "https://images.unsplash.com/photo-1609521263047-f8f205293f24?w=600&h=280&fit=crop&q=80", seats: 5, fuel: "Petrol", trans: "Auto", daily: 1100 },
+      { id: 32, name: "Mahindra Thar", sub: "2024 • LX 4WD Hard Top", cls: "SUV", emoji: "🌵", img: "https://images.pexels.com/photos/34940284/pexels-photo-34940284.jpeg", seats: 4, fuel: "Diesel", trans: "Manual", daily: 2800 },
+      { id: 33, name: "Lamborghini Huracan", sub: "2024 • STO", cls: "Sport", emoji: "🔥", img: "https://images.pexels.com/photos/29884349/pexels-photo-29884349.jpeg", seats: 2, fuel: "Petrol", trans: "Auto", daily: 19000 },
+      { id: 34, name: "Jaguar F-Type", sub: "2024 • R Coupe", cls: "Sport", emoji: "🐆", img: "https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=600&h=280&fit=crop&q=80", seats: 2, fuel: "Petrol", trans: "Auto", daily: 10500 },
+      { id: 35, name: "Lexus LX 600", sub: "2024 • Ultra Luxury", cls: "SUV", emoji: "🍁", img: "https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?w=600&h=280&fit=crop&q=80", seats: 7, fuel: "Petrol", trans: "Auto", daily: 9200 },
+      { id: 36, name: "Audi e-tron GT", sub: "2024 • RS Quattro", cls: "Electric", emoji: "🌩️", img: "https://images.pexels.com/photos/9452202/pexels-photo-9452202.jpeg", seats: 5, fuel: "Electric", trans: "Auto", daily: 7400 },
+      { id: 37, name: "Volvo XC90 Recharge", sub: "2024 • Ultimate", cls: "SUV", emoji: "❄️", img: "https://images.unsplash.com/photo-1612544448445-b8232cff3b6c?w=600&h=280&fit=crop&q=80", seats: 7, fuel: "Hybrid", trans: "Auto", daily: 5200 },
+      { id: 38, name: "Genesis G90", sub: "2024 • 3.5T AWD", cls: "Luxury", emoji: "🌙", img: "https://images.pexels.com/photos/12506835/pexels-photo-12506835.jpeg", seats: 5, fuel: "Petrol", trans: "Auto", daily: 6800 },
+      { id: 39, name: "Skoda Octavia RS", sub: "2024 • RS 245", cls: "Sedan", emoji: "🎯", img: "https://images.unsplash.com/photo-1541899481282-d53bffe3c35d?w=600&h=280&fit=crop&q=80", seats: 5, fuel: "Petrol", trans: "Auto", daily: 2200 },
+      { id: 40, name: "Porsche Taycan", sub: "2024 • Turbo S Cross Turismo", cls: "Electric", emoji: "⚡", img: "https://images.pexels.com/photos/35849577/pexels-photo-35849577.jpeg", seats: 5, fuel: "Electric", trans: "Auto", daily: 11500 },
+      { id: 41, name: "Ferrari Roma", sub: "2024 • V8 GT", cls: "Sport", emoji: "🌹", img: "https://images.unsplash.com/photo-1583121274602-3e2820c69888?w=600&h=280&fit=crop&q=80", seats: 2, fuel: "Petrol", trans: "Auto", daily: 21000 },
+      { id: 42, name: "Rolls-Royce Cullinan", sub: "2024 • Black Badge", cls: "SUV", emoji: "🖤", img: "https://images.unsplash.com/photo-1632245889029-e406faaa34cd?w=600&h=280&fit=crop&q=80", seats: 5, fuel: "Petrol", trans: "Auto", daily: 35000 },
+      { id: 43, name: "Hyundai Ioniq 6", sub: "2024 • AWD Premium", cls: "Electric", emoji: "🔵", img: "https://images.pexels.com/photos/33125984/pexels-photo-33125984.jpeg", seats: 5, fuel: "Electric", trans: "Auto", daily: 3200 },
+      { id: 44, name: "Toyota GR Supra", sub: "2024 • A90 3.0T", cls: "Sport", emoji: "🟡", img: "https://images.pexels.com/photos/10978972/pexels-photo-10978972.jpeg", seats: 2, fuel: "Petrol", trans: "Auto", daily: 7800 },
+      { id: 45, name: "Audi Q8 e-tron", sub: "2024 • S-Line Quattro", cls: "SUV", emoji: "🔷", img: "https://images.unsplash.com/photo-1563720223185-11003d516935?w=600&h=280&fit=crop&q=80", seats: 5, fuel: "Electric", trans: "Auto", daily: 6400 },
+      { id: 46, name: "Mercedes AMG GT", sub: "2024 • 63 S 4-Door", cls: "Sport", emoji: "⭐", img: "https://images.unsplash.com/photo-1609521263047-f8f205293f24?w=600&h=280&fit=crop&q=80", seats: 4, fuel: "Petrol", trans: "Auto", daily: 14500 },
+      { id: 47, name: "Maruti Swift", sub: "2024 • ZXi Plus AMT", cls: "Sedan", emoji: "🌈", img: "https://images.unsplash.com/photo-1541899481282-d53bffe3c35d?w=600&h=280&fit=crop&q=80", seats: 5, fuel: "Petrol", trans: "Auto", daily: 900 },
+      { id: 48, name: "Lamborghini Revuelto", sub: "2024 • V12 Hybrid", cls: "Sport", emoji: "🌋", img: "https://images.unsplash.com/photo-1526726538690-5cbf956ae2fd?w=600&h=280&fit=crop&q=80", seats: 2, fuel: "Hybrid", trans: "Auto", daily: 55000 },
+  ];
+/* ══════════════════════════════════════════════════════
+   AUTH — ADMIN CREDENTIALS
+══════════════════════════════════════════════════════ */
+const ADMINS = [
+  { email: "madhanreddy466@gmail.com", pass: "12345678",  name: "Madhan Reddy", initials: "MR" },
+  { email: "sudheer@gmail.com",        pass: "123456789", name: "Sudheer",      initials: "SD" },
+];
+
+let currentAdmin = null;
+
+function doLogin() {
+  const email = document.getElementById('loginEmail').value.trim().toLowerCase();
+  const pass  = document.getElementById('loginPass').value;
+  const admin = ADMINS.find(a => a.email.toLowerCase() === email && a.pass === pass);
+  if (!admin) {
+    const err = document.getElementById('loginError');
+    err.classList.add('show');
+    setTimeout(() => err.classList.remove('show'), 3000);
+    return;
+  }
+  currentAdmin = admin;
+  sessionStorage.setItem('veloce_admin', JSON.stringify(admin));
+  addLog('admin', '🔑 Admin Login', admin.name, admin.email);
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('appShell').classList.add('visible');
+  document.getElementById('adminName').textContent = admin.name;
+  document.getElementById('adminAvatar').textContent = admin.initials;
+  initDashboard();
+  showToast('👋 Welcome back, ' + admin.name + '!', 'ok');
+}
+
+function doLogout() {
+  if (currentAdmin) addLog('admin', '🚪 Admin Logout', currentAdmin.name, currentAdmin.email);
+  sessionStorage.removeItem('veloce_admin');
+  location.reload();
+}
+
+/* ══════════════════════════════════════════════════════
+   LOCAL STORAGE HELPERS
+══════════════════════════════════════════════════════ */
+function getCars() {
+  const raw = localStorage.getItem('veloce_admin_cars');
+  return raw ? JSON.parse(raw) : JSON.parse(JSON.stringify(BASE_CARS));
+}
+function saveCars(list) { localStorage.setItem('veloce_admin_cars', JSON.stringify(list)); }
+
+function getBookings() {
+  const raw = localStorage.getItem('veloce_bookings');
+  return raw ? JSON.parse(raw) : [];
+}
+function saveBookings(list) { localStorage.setItem('veloce_bookings', JSON.stringify(list)); }
+
+function getBookedIds() {
+  const raw = localStorage.getItem('veloce_booked_ids');
+  return raw ? JSON.parse(raw) : [];
+}
+function saveBookedIds(ids) { localStorage.setItem('veloce_booked_ids', JSON.stringify(ids)); }
+
+function isAvailable(carId) { return !getBookedIds().includes(carId); }
+
+function getLogs() {
+  const raw = localStorage.getItem('veloce_activity_logs');
+  return raw ? JSON.parse(raw) : [];
+}
+function saveLogs(list) { localStorage.setItem('veloce_activity_logs', JSON.stringify(list)); }
+
+function getRefunds() {
+  const raw = localStorage.getItem('veloce_refunds');
+  return raw ? JSON.parse(raw) : [];
+}
+function saveRefunds(list) { localStorage.setItem('veloce_refunds', JSON.stringify(list)); }
+
+function getUserActivity() {
+  const raw = localStorage.getItem('veloce_user_activity');
+  return raw ? JSON.parse(raw) : [];
+}
+function saveUserActivity(list) { localStorage.setItem('veloce_user_activity', JSON.stringify(list)); }
+
+/* ══════════════════════════════════════════════════════
+   LOG HELPERS
+══════════════════════════════════════════════════════ */
+function addLog(type, action, user, details) {
+  const logs = getLogs();
+  logs.unshift({ type, action, user, details, ts: new Date().toLocaleString('en-IN') });
+  if (logs.length > 200) logs.pop();
+  saveLogs(logs);
+}
+
+function addUserActivity(email, action, details) {
+  const list = getUserActivity();
+  list.unshift({ email, action, details, ts: new Date().toLocaleString('en-IN') });
+  if (list.length > 200) list.pop();
+  saveUserActivity(list);
+}
+
+/* ══════════════════════════════════════════════════════
+   PANEL NAVIGATION
+══════════════════════════════════════════════════════ */
+const panelTitles = {
+  dashboard: ['DASHBOARD', 'Overview & Analytics'],
+  fleet: ['FLEET MANAGEMENT', 'Vehicles & Inventory'],
+  bookings: ['BOOKINGS', 'All Reservations'],
+  refunds: ['REFUND REQUESTS', 'Cancellation Approvals'],
+  users: ['USERS', 'Customer Management'],
+  availability: ['AVAILABILITY', 'Real-time Status Control'],
+  logs: ['ACTIVITY LOGS', 'Audit Trail'],
+  about: ['ABOUT', 'System & Project Info'],
+};
+
+function showPanel(id, el) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('panel-' + id).classList.add('active');
+  if (el) el.classList.add('active');
+  const t = panelTitles[id] || [id.toUpperCase(), ''];
+  document.getElementById('topbarTitle').textContent = t[0];
+  document.getElementById('topbarSub').textContent = t[1];
+
+  // Render on demand
+  if (id === 'dashboard') renderDashboard();
+  if (id === 'fleet') renderFleet();
+  if (id === 'bookings') renderBookingsTable();
+  if (id === 'refunds') renderRefunds();
+  if (id === 'users') renderUsers();
+  if (id === 'availability') renderAvailability();
+  if (id === 'logs') renderLogs();
+  updateBadges();
+}
+
+/* ══════════════════════════════════════════════════════
+   FORMAT
+══════════════════════════════════════════════════════ */
+function fmt(n) { return '₹' + Number(n||0).toLocaleString('en-IN'); }
+
+/* ══════════════════════════════════════════════════════
+   CLOCK
+══════════════════════════════════════════════════════ */
+function updateClock() {
+  document.getElementById('clock').textContent = new Date().toLocaleTimeString('en-IN', {hour:'2-digit',minute:'2-digit',second:'2-digit'});
+}
+setInterval(updateClock, 1000);
+
+/* ══════════════════════════════════════════════════════
+   INIT
+══════════════════════════════════════════════════════ */
+function initDashboard() {
+  updateClock();
+  updateBadges();
+  renderDashboard();
+
+  // Inject some demo data if empty
+  if (!getBookings().length) seedDemoData();
+}
+
+function seedDemoData() {
+  const cars = getCars();
+  const demos = [
+    { id:'VLC001', carId:1, carName:'Ferrari 488 GTB', carEmoji:'🏎️', name:'Rahul Sharma', phone:'9876543210', start:'2025-01-10', end:'2025-01-12', days:2, total:17000, loc:'Banjara Hills', status:'completed', bookedOn:'2025-01-10' },
+    { id:'VLC002', carId:13, carName:'Rolls-Royce Ghost', carEmoji:'👑', name:'Priya Nair', phone:'9123456789', start:'2025-01-15', end:'2025-01-17', days:2, total:56000, loc:'Jubilee Hills', status:'completed', bookedOn:'2025-01-15' },
+    { id:'VLC003', carId:5, carName:'Tesla Model S', carEmoji:'⚡', name:'Arjun Kapoor', phone:'9988776655', start:'2025-02-01', end:'2025-02-03', days:2, total:10000, loc:'Gachibowli', status:'upcoming', bookedOn:'2025-01-28' },
+    { id:'VLC004', carId:8, carName:'Lamborghini Urus', carEmoji:'🦁', name:'Sneha Reddy', phone:'9012345678', start:'2025-02-05', end:'2025-02-06', days:1, total:12000, loc:'Hitech City', status:'active', bookedOn:'2025-02-05' },
+    { id:'VLC005', carId:16, carName:'Bugatti Chiron', carEmoji:'🐝', name:'Vikram Singh', phone:'9871234560', start:'2025-02-10', end:'2025-02-11', days:1, total:45000, loc:'Banjara Hills', status:'cancelled', bookedOn:'2025-02-09' },
+  ];
+  saveBookings(demos);
+
+  const demoLogs = [
+    { type:'booking', action:'📋 New Booking', user:'Rahul Sharma', details:'Ferrari 488 GTB · VLC001', ts: new Date(Date.now()-86400000*5).toLocaleString('en-IN') },
+    { type:'login',   action:'🔑 User Login',  user:'Priya Nair',   details:'priya@gmail.com',          ts: new Date(Date.now()-86400000*4).toLocaleString('en-IN') },
+    { type:'booking', action:'📋 New Booking', user:'Priya Nair',   details:'Rolls-Royce Ghost · VLC002',ts: new Date(Date.now()-86400000*3).toLocaleString('en-IN') },
+    { type:'cancel',  action:'❌ Cancellation',user:'Vikram Singh', details:'Bugatti Chiron · VLC005',  ts: new Date(Date.now()-86400000*2).toLocaleString('en-IN') },
+    { type:'admin',   action:'⚙️ Admin Login', user:'Madhan Reddy', details:'madhanreddy466@gmail.com', ts: new Date(Date.now()-3600000).toLocaleString('en-IN') },
+  ];
+  saveLogs(demoLogs);
+
+  const demoRefunds = [
+    { id:'REF001', bookingId:'VLC005', carName:'Bugatti Chiron', userName:'Vikram Singh', amount:45000, status:'pending', requestedOn: new Date(Date.now()-86400000).toLocaleString('en-IN'), reason:'Change of plans' },
+  ];
+  saveRefunds(demoRefunds);
+}
+
+function updateBadges() {
+  const b = getBookings().length;
+  document.getElementById('booking-count-badge').textContent = b;
+  const pending = getRefunds().filter(r => r.status === 'pending').length;
+  const rb = document.getElementById('refund-count-badge');
+  rb.textContent = pending;
+  rb.style.display = pending ? 'inline' : 'none';
+}
+
+/* ══════════════════════════════════════════════════════
+   DASHBOARD
+══════════════════════════════════════════════════════ */
+async function renderDashboard() {
+	const res = await fetch('/api/admin/bookings');
+	const bookings = await res.json();
+  const cars = getCars();
+  const total =
+	    bookings.reduce((a, b) =>
+	        a + (b.price || 0), 0);
+  const totalCars = cars.length;
+
+//booked cars based on database bookings
+const bookedCarIds =
+   [...new Set(bookings.map(b => b.carId))];
+
+const booked = bookings.length;
+
+const avail = cars.length - booked;
+  document.getElementById('kpi-revenue').textContent = fmt(total);
+  document.getElementById('kpi-bookings').textContent = bookings.length;
+  document.getElementById('kpi-available').textContent = avail;
+  document.getElementById('kpi-booked').textContent = booked;
+  document.getElementById('kpi-avail-pct').textContent = `${Math.round((avail/cars.length)*100)}% of fleet`;
+
+  // Recent bookings
+  const tbody = document.getElementById('recent-body');
+  if (!bookings.length) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--gray);padding:32px">No bookings yet.</td></tr>';
+  } else {
+    tbody.innerHTML = bookings.slice(0, 8).map(b => `
+      <tr>
+        <td><span style="font-family:'Space Mono',monospace;font-size:0.72rem;color:var(--red)">${b.id}</span></td>
+        <td>${b.carEmoji||'🚗'} <strong${b.carName || 'Booked Car'}</strong></td>
+        <td>${b.name}</td>
+        <td style="font-size:0.8rem;color:var(--gray)">
+        ${b.pickupDate} → ${b.returnDate}
+        </td>
+        <td><span style="font-family:'Space Mono',monospace;color:var(--gold)">${fmt(b.price)}</span></td>
+        <td>${statusBadge('upcoming')}</td>
+      </tr>`).join('');
+  }
+
+  // Category breakdown
+  const cats = ['Sport','Luxury','SUV','Sedan','Electric'];
+  const colors = ['var(--red)','var(--gold)','var(--blue)','var(--success)','#9b59b6'];
+  const breakdown = document.getElementById('cat-breakdown');
+  breakdown.innerHTML = cats.map((cls, i) => {
+    const total = cars.filter(c => c.cls === cls).length;
+    const bookedCars =
+        bookings.length;
+
+    const av =
+        cars.filter(c => c.cls === cls).length
+        - bookedCars;    const pct = Math.round((av / total) * 100);
+    return `<div class="progress-row" style="margin-bottom:14px">
+      <span class="progress-label">${cls}</span>
+      <div class="progress-bar"><div class="progress-fill" style="width:${pct}%;background:${colors[i]}"></div></div>
+      <span class="progress-val">${av}/${total}</span>
+    </div>`;
+  }).join('');
+
+  // Top customers
+  const userMap = {};
+  bookings.forEach(b => {
+    if (!userMap[b.name]) userMap[b.name] = { name: b.name, count: 0, spent: 0 };
+    userMap[b.name].count++;
+    userMap[b.name].spent += b.price || 0;
+  });
+  const topUsers = Object.values(userMap).sort((a, b) => b.spent - a.spent).slice(0, 5);
+  const tc = document.getElementById('top-customers');
+  if (!topUsers.length) {
+    tc.innerHTML = '<div style="color:var(--gray);font-size:0.85rem;padding:12px 0">No customers yet.</div>';
+  } else {
+    tc.innerHTML = topUsers.map((u, i) => `
+      <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid rgba(42,42,42,0.5)">
+        <span style="font-family:'Space Mono',monospace;font-size:0.7rem;color:var(--gray);min-width:20px">#${i+1}</span>
+        <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--red),#a00);display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:700;flex-shrink:0">${u.name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase()}</div>
+        <span style="flex:1;font-size:0.85rem">${u.name}</span>
+        <span style="font-family:'Space Mono',monospace;font-size:0.72rem;color:var(--gold)">${fmt(u.spent)}</span>
+      </div>`).join('');
+  }
+}
+
+/* ══════════════════════════════════════════════════════
+   FLEET
+══════════════════════════════════════════════════════ */
+let fleetFilter = 'All';
+let fleetViewMode = 'grid';
+
+function setFleetView(mode, btn) {
+  fleetViewMode = mode;
+  document.querySelectorAll('.view-switch-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('fleet-grid-view').style.display = mode === 'grid' ? 'block' : 'none';
+  document.getElementById('fleet-table-view').style.display = mode === 'table' ? 'block' : 'none';
+  renderFleet();
+}
+
+function filterFleet(cls, el) {
+  fleetFilter = cls;
+  document.querySelectorAll('#fleet-filters .chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  renderFleet();
+}
+
+function renderFleet() {
+  const cars = getCars().filter(c => fleetFilter === 'All' || c.cls === fleetFilter);
+  if (fleetViewMode === 'grid') renderFleetGrid(cars);
+  else renderFleetTable();
+}
+
+function renderFleetGrid(cars) {
+  const grid = document.getElementById('fleet-grid');
+  if (!cars.length) { grid.innerHTML = '<div class="empty-state"><div class="icon">🚗</div><p>No vehicles found.</p></div>'; return; }
+  grid.innerHTML = cars.map(car => {
+    const avail = isAvailable(car.id);
+    return `<div class="fleet-card">
+      <div class="fleet-card-img">
+        <img src="${car.img}" alt="${car.name}" onerror="this.style.display='none'">
+        <div class="fleet-card-img-overlay"></div>
+      </div>
+      <span class="fleet-avail-badge ${avail ? 'on' : 'off'}">${avail ? 'Available' : 'Booked'}</span>
+      <div class="fleet-card-body">
+        <div class="fleet-card-cls">${car.cls}</div>
+        <div class="fleet-card-name">${car.emoji} ${car.name}</div>
+        <div class="fleet-card-sub">${car.sub}</div>
+        <div class="fleet-card-specs">
+          <div class="fc-spec"><div class="fc-spec-val">${car.seats}</div><div class="fc-spec-lbl">Seats</div></div>
+          <div class="fc-spec"><div class="fc-spec-val">${car.fuel}</div><div class="fc-spec-lbl">Fuel</div></div>
+          <div class="fc-spec"><div class="fc-spec-val">${car.trans}</div><div class="fc-spec-lbl">Trans</div></div>
+        </div>
+        <div class="fleet-card-footer">
+          <div class="fleet-price">${fmt(car.daily)}<span>/day</span></div>
+          <div class="fleet-card-actions">
+            <button class="tbl-btn tbl-edit" onclick="openCarModal(${car.id})">Edit</button>
+            <button class="tbl-btn tbl-delete" onclick="deleteCar(${car.id})">Del</button>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderFleetTable() {
+  const q = (document.getElementById('fleet-search')?.value || '').toLowerCase();
+  const cars = getCars().filter(c => {
+    const match = fleetFilter === 'All' || c.cls === fleetFilter;
+    const search = !q || c.name.toLowerCase().includes(q) || c.cls.toLowerCase().includes(q);
+    return match && search;
+  });
+  const tbody = document.getElementById('fleet-table-body');
+  if (!cars.length) { tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--gray);padding:32px">No vehicles found.</td></tr>'; return; }
+  tbody.innerHTML = cars.map(car => {
+    const avail = isAvailable(car.id);
+    return `<tr>
+      <td><img src="${car.img}" class="car-thumb" onerror="this.style.background='var(--card2)'"></td>
+      <td><div style="font-weight:600;color:var(--white)">${car.emoji} ${car.name}</div><div style="font-size:0.72rem;color:var(--gray)">${car.sub}</div></td>
+      <td><span class="badge badge-gray">${car.cls}</span></td>
+      <td style="font-size:0.78rem;color:var(--gray)">${car.seats} seats · ${car.fuel} · ${car.trans}</td>
+      <td><span style="font-family:'Space Mono',monospace;color:var(--gold)">${fmt(car.daily)}</span></td>
+      <td><span class="badge ${avail ? 'badge-green' : 'badge-red'}">${avail ? 'Available' : 'Booked'}</span></td>
+      <td>
+        <button class="tbl-btn tbl-edit" onclick="openCarModal(${car.id})">Edit</button>
+        ${avail ? '' : `<button class="tbl-btn tbl-approve" onclick="releaseCar(${car.id})">Release</button>`}
+        <button class="tbl-btn tbl-delete" onclick="deleteCar(${car.id})">Remove</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+/* ══════════════════════════════════════════════════════
+   CAR MODAL
+══════════════════════════════════════════════════════ */
+function openCarModal(carId) {
+  const modal = document.getElementById('carModal');
+  if (carId) {
+    const car = getCars().find(c => c.id === carId);
+    if (!car) return;
+    document.getElementById('carModalTitle').textContent = 'EDIT VEHICLE';
+    document.getElementById('editCarId').value = carId;
+    document.getElementById('cm-name').value = car.name;
+    document.getElementById('cm-sub').value = car.sub;
+    document.getElementById('cm-cls').value = car.cls;
+    document.getElementById('cm-daily').value = car.daily;
+    document.getElementById('cm-seats').value = car.seats;
+    document.getElementById('cm-fuel').value = car.fuel;
+    document.getElementById('cm-trans').value = car.trans;
+    document.getElementById('cm-emoji').value = car.emoji;
+    document.getElementById('cm-img').value = car.img;
+    document.getElementById('cm-avail').value = isAvailable(carId) ? '1' : '0';
+  } else {
+    document.getElementById('carModalTitle').textContent = 'ADD NEW VEHICLE';
+    document.getElementById('editCarId').value = '';
+    ['cm-name','cm-sub','cm-emoji','cm-img'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('cm-daily').value = '';
+    document.getElementById('cm-seats').value = '5';
+    document.getElementById('cm-cls').value = 'Sedan';
+    document.getElementById('cm-fuel').value = 'Petrol';
+    document.getElementById('cm-trans').value = 'Auto';
+    document.getElementById('cm-avail').value = '1';
+  }
+  modal.classList.add('open');
+}
+
+function closeCarModal() { document.getElementById('carModal').classList.remove('open'); }
+
+function saveCar() {
+  const name = document.getElementById('cm-name').value.trim();
+  const daily = parseInt(document.getElementById('cm-daily').value);
+  if (!name || !daily) { showToast('⚠️ Car name and daily rate are required.', 'err'); return; }
+
+  const cars = getCars();
+  const editId = document.getElementById('editCarId').value;
+  const carData = {
+    name,
+    sub: document.getElementById('cm-sub').value || '',
+    cls: document.getElementById('cm-cls').value,
+    daily,
+    seats: parseInt(document.getElementById('cm-seats').value) || 5,
+    fuel: document.getElementById('cm-fuel').value,
+    trans: document.getElementById('cm-trans').value,
+    emoji: document.getElementById('cm-emoji').value || '🚗',
+    img: document.getElementById('cm-img').value || '',
+  };
+
+  if (editId) {
+    const idx = cars.findIndex(c => c.id === parseInt(editId));
+    if (idx > -1) {
+      cars[idx] = { ...cars[idx], ...carData };
+      const avail = document.getElementById('cm-avail').value === '1';
+      const ids = getBookedIds();
+      if (avail) saveBookedIds(ids.filter(i => i !== parseInt(editId)));
+      else if (!ids.includes(parseInt(editId))) saveBookedIds([...ids, parseInt(editId)]);
+      addLog('admin', '✏️ Car Updated', currentAdmin?.name || 'Admin', carData.name);
+      showToast('✅ ' + carData.name + ' updated.', 'ok');
+    }
+  } else {
+    const newId = Math.max(...cars.map(c => c.id), 0) + 1;
+    carData.id = newId;
+    if (document.getElementById('cm-avail').value === '0') {
+      saveBookedIds([...getBookedIds(), newId]);
+    }
+    cars.push(carData);
+    addLog('admin', '➕ Car Added', currentAdmin?.name || 'Admin', carData.name);
+    showToast('🚗 ' + carData.name + ' added to fleet!', 'ok');
+  }
+  saveCars(cars);
+  closeCarModal();
+  renderFleet();
+  renderDashboard();
+  updateBadges();
+}
+
+function deleteCar(id) {
+  if (!confirm('Remove this vehicle from the fleet?')) return;
+  const cars = getCars().filter(c => c.id !== id);
+  saveCars(cars);
+  saveBookedIds(getBookedIds().filter(i => i !== id));
+  const car = getCars().find(c => c.id === id);
+  addLog('admin', '🗑 Car Removed', currentAdmin?.name || 'Admin', 'ID #' + id);
+  showToast('🗑 Vehicle removed.', 'info');
+  renderFleet();
+  renderDashboard();
+}
+
+function releaseCar(id) {
+  saveBookedIds(getBookedIds().filter(i => i !== id));
+  const car = getCars().find(c => c.id === id);
+  addLog('admin', '✅ Car Released', currentAdmin?.name || 'Admin', car?.name || '#' + id);
+  showToast('✅ Car marked as available.', 'ok');
+  renderFleetTable();
+  renderAvailability();
+}
+
+/* ══════════════════════════════════════════════════════
+   BOOKINGS
+══════════════════════════════════════════════════════ */
+let bookingFilter = 'all';
+
+function filterBookings(f, el) {
+  bookingFilter = f;
+  document.querySelectorAll('#panel-bookings .chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  renderBookingsTable();
+}
+
+function renderBookingsTable() {
+  const q = (document.getElementById('booking-search')?.value || '').toLowerCase();
+  let list = getBookings();
+  if (bookingFilter !== 'all') list = list.filter(b => b.status === bookingFilter);
+  if (q) list = list.filter(b => b.carName.toLowerCase().includes(q) || b.name.toLowerCase().includes(q) || b.id.toLowerCase().includes(q));
+  const tbody = document.getElementById('bookings-tbody');
+  if (!list.length) { tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--gray);padding:32px">No bookings found.</td></tr>'; return; }
+  tbody.innerHTML = list.map(b => `
+    <tr>
+      <td><span style="font-family:'Space Mono',monospace;font-size:0.72rem;color:var(--red)">${b.id}</span></td>
+      <td>${b.carEmoji||'🚗'} <strong>$${b.carName || 'Booked Car'}</strong></td>
+      <td>${b.name}<br><span style="font-size:0.72rem;color:var(--gray)">${b.phone||''}</span></td>
+      <td style="font-size:0.8rem">${b.start}</td>
+      <td style="font-size:0.8rem">${b.end}</td>
+      <td><span style="font-family:'Space Mono',monospace;color:var(--gold)">${fmt(b.total)}</span></td>
+      <td>${statusBadge(b.status)}</td>
+      <td>
+        ${b.status !== 'cancelled' ? `<button class="tbl-btn tbl-delete" onclick="cancelBooking('${b.id}')">Cancel</button>` : ''}
+        ${b.status === 'cancelled' && !getRefunds().find(r => r.bookingId === b.id) ? `<button class="tbl-btn tbl-reject" onclick="createRefund('${b.id}')">Refund?</button>` : ''}
+      </td>
+    </tr>`).join('');
+}
+
+function cancelBooking(id) {
+  if (!confirm('Cancel booking ' + id + '?')) return;
+  const list = getBookings();
+  const idx = list.findIndex(b => b.id === id);
+  if (idx < 0) return;
+  const b = list[idx];
+  list[idx].status = 'cancelled';
+  saveBookings(list);
+  saveBookedIds(getBookedIds().filter(i => i !== b.carId));
+  addLog('cancel', '❌ Booking Cancelled', currentAdmin?.name || 'Admin', b.carName + ' · ' + id);
+  // Auto-create refund request
+  createRefund(id);
+  showToast('❌ Booking ' + id + ' cancelled. Refund request created.', 'info');
+  renderBookingsTable();
+  renderDashboard();
+  updateBadges();
+}
+
+function createRefund(bookingId) {
+  const b = getBookings().find(b => b.id === bookingId);
+  if (!b) return;
+  const refunds = getRefunds();
+  if (refunds.find(r => r.bookingId === bookingId)) return;
+  const ref = {
+    id: 'REF' + Date.now().toString().slice(-4),
+    bookingId, carName: b.carName, userName: b.name,
+    amount: b.total, status: 'pending',
+    requestedOn: new Date().toLocaleString('en-IN'), reason: 'Customer cancellation'
+  };
+  refunds.unshift(ref);
+  saveRefunds(refunds);
+  addLog('refund', '💰 Refund Requested', b.name, fmt(b.total) + ' · ' + b.carName);
+  updateBadges();
+}
+
+function exportBookings() {
+  const bookings = getBookings();
+  const csv = ['ID,Vehicle,Customer,Phone,Start,End,Days,Total,Status', ...bookings.map(b =>
+    `${b.id},${b.carName || 'Booked Car'},${b.name},${b.phone||''},${b.start},${b.end},${b.days||0},${b.total},${b.status}`)].join('\n');
+  const blob = new Blob([csv], {type:'text/csv'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'veloce_bookings.csv';
+  a.click();
+  addLog('admin', '⬇ CSV Export', currentAdmin?.name || 'Admin', bookings.length + ' bookings');
+  showToast('📥 Bookings exported as CSV.', 'ok');
+}
+
+/* ══════════════════════════════════════════════════════
+   REFUNDS
+══════════════════════════════════════════════════════ */
+let refundTabCurrent = 'pending';
+
+function switchRefundTab(tab, btn) {
+  refundTabCurrent = tab;
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('#panel-refunds .tab-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('refund-' + tab).classList.add('active');
+  renderRefunds();
+}
+
+function renderRefunds() {
+  const all = getRefunds();
+  const pending = all.filter(r => r.status === 'pending');
+  document.getElementById('pending-cnt').textContent = pending.length ? `(${pending.length})` : '';
+
+  ['pending','approved','rejected'].forEach(status => {
+    const list = all.filter(r => r.status === status);
+    const el = document.getElementById('refund-' + status);
+    if (!list.length) {
+      el.innerHTML = `<div class="empty-state"><div class="icon">${status === 'pending' ? '🕐' : status === 'approved' ? '✅' : '❌'}</div><p>No ${status} refunds.</p></div>`;
+      return;
+    }
+    el.innerHTML = list.map(r => `
+      <div class="refund-item">
+        <div class="refund-top">
+          <div>
+            <div class="refund-id">${r.id} · ${r.bookingId}</div>
+            <div class="refund-car">${r.carName}</div>
+            <div class="refund-user">👤 ${r.userName} · Requested: ${r.requestedOn}</div>
+            ${r.reason ? `<div style="font-size:0.78rem;color:var(--gray);margin-top:4px">Reason: ${r.reason}</div>` : ''}
+          </div>
+          <div>
+            <div class="refund-amount">${fmt(r.amount)}</div>
+            <span class="badge ${r.status === 'pending' ? 'badge-warning' : r.status === 'approved' ? 'badge-green' : 'badge-red'}">${r.status}</span>
+          </div>
+        </div>
+        ${r.status === 'pending' ? `
+        <div class="refund-actions">
+          <button class="btn btn-success btn-sm" onclick="approveRefund('${r.id}')">✅ Approve Refund</button>
+          <button class="btn btn-outline btn-sm" onclick="rejectRefund('${r.id}')">❌ Reject</button>
+        </div>` : `<div style="font-size:0.78rem;color:var(--gray)">Processed on: ${r.processedOn||'—'}</div>`}
+      </div>`).join('');
+  });
+}
+
+function approveRefund(id) {
+  const refunds = getRefunds();
+  const idx = refunds.findIndex(r => r.id === id);
+  if (idx < 0) return;
+  refunds[idx].status = 'approved';
+  refunds[idx].processedOn = new Date().toLocaleString('en-IN');
+  saveRefunds(refunds);
+  addLog('refund', '✅ Refund Approved', currentAdmin?.name || 'Admin', refunds[idx].carName + ' · ' + fmt(refunds[idx].amount));
+  showToast('✅ Refund ' + id + ' approved.', 'ok');
+  renderRefunds();
+  updateBadges();
+}
+
+function rejectRefund(id) {
+  const refunds = getRefunds();
+  const idx = refunds.findIndex(r => r.id === id);
+  if (idx < 0) return;
+  refunds[idx].status = 'rejected';
+  refunds[idx].processedOn = new Date().toLocaleString('en-IN');
+  saveRefunds(refunds);
+  addLog('refund', '❌ Refund Rejected', currentAdmin?.name || 'Admin', refunds[idx].carName);
+  showToast('❌ Refund ' + id + ' rejected.', 'err');
+  renderRefunds();
+  updateBadges();
+}
+
+/* ══════════════════════════════════════════════════════
+   USERS
+══════════════════════════════════════════════════════ */
+function renderUsers() {
+  const bookings = getBookings();
+  const userMap = {};
+  bookings.forEach(b => {
+    if (!userMap[b.name]) userMap[b.name] = { name: b.name, phone: b.phone || '—', count: 0, spent: 0, lastAction: b.bookedOn || '—', email: '' };
+    userMap[b.name].count++;
+    userMap[b.name].spent += b.total || 0;
+    userMap[b.name].lastAction = b.bookedOn || userMap[b.name].lastAction;
+  });
+  const users = Object.values(userMap);
+  document.getElementById('user-total').textContent = users.length;
+  document.getElementById('user-active').textContent = users.filter(u => u.count > 0).length;
+  renderUsersTable();
+
+  // Activity
+  const activity = getUserActivity();
+  const atbody = document.getElementById('activity-tbody');
+  if (!activity.length && !bookings.length) {
+    atbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--gray);padding:24px">No activity yet.</td></tr>';
+  } else {
+    const combined = [...bookings.map(b => ({ user: b.name, action: '📋 Booking Made', details: b.carName + ' · ' + fmt(b.total), ts: b.bookedOn || '—' })), ...activity].slice(0, 20);
+    atbody.innerHTML = combined.map(a => `
+      <tr>
+        <td>${a.user || a.email || '—'}</td>
+        <td>${a.action}</td>
+        <td style="font-size:0.8rem;color:var(--gray)">${a.details}</td>
+        <td><span style="font-family:'Space Mono',monospace;font-size:0.7rem;color:var(--gray)">${a.ts}</span></td>
+      </tr>`).join('');
+  }
+}
+
+function renderUsersTable() {
+  const q = (document.getElementById('user-search')?.value || '').toLowerCase();
+  const bookings = getBookings();
+  const userMap = {};
+  bookings.forEach(b => {
+    if (!userMap[b.name]) userMap[b.name] = { name: b.name, phone: b.phone || '—', count: 0, spent: 0, lastAction: b.bookedOn || '—' };
+    userMap[b.name].count++;
+    userMap[b.name].spent += b.total || 0;
+  });
+  let users = Object.values(userMap);
+  if (q) users = users.filter(u => u.name.toLowerCase().includes(q) || u.phone.includes(q));
+  const tbody = document.getElementById('users-tbody');
+  if (!users.length) { tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--gray);padding:32px">No users found.</td></tr>'; return; }
+  tbody.innerHTML = users.map(u => {
+    const tier = u.spent > 100000 ? 'Platinum' : u.spent > 50000 ? 'Gold' : 'Silver';
+    const tierClass = { Platinum: 'badge-blue', Gold: 'badge-gold', Silver: 'badge-gray' }[tier];
+    return `<tr>
+      <td><div style="display:flex;align-items:center;gap:10px">
+        <div style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--red),#a00);display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:700;flex-shrink:0">${u.name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2)}</div>
+        <strong>${u.name}</strong>
+      </div></td>
+      <td style="color:var(--gray);font-size:0.8rem">—</td>
+      <td style="font-size:0.82rem">${u.phone}</td>
+      <td><span style="font-family:'Space Mono',monospace">${u.count}</span></td>
+      <td><span style="font-family:'Space Mono',monospace;color:var(--gold)">${fmt(u.spent)}</span></td>
+      <td style="font-size:0.78rem;color:var(--gray)">${u.lastAction}</td>
+      <td><span class="badge ${tierClass}">${tier}</span></td>
+    </tr>`;
+  }).join('');
+}
+
+/* ══════════════════════════════════════════════════════
+   AVAILABILITY
+══════════════════════════════════════════════════════ */
+let availFilter = 'all';
+
+function filterAvail(f, el) {
+  availFilter = f;
+  document.querySelectorAll('#panel-availability .chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  renderAvailability();
+}
+
+function renderAvailability() {
+  const cars = getCars();
+  const availCount = cars.filter(c => isAvailable(c.id)).length;
+  const bookedCount = cars.length - availCount;
+  document.getElementById('av-available').textContent = availCount;
+  document.getElementById('av-booked').textContent = bookedCount;
+  document.getElementById('av-rate').textContent = Math.round((bookedCount / cars.length) * 100) + '%';
+
+  let filtered = cars;
+  if (availFilter === 'available') filtered = cars.filter(c => isAvailable(c.id));
+  if (availFilter === 'booked') filtered = cars.filter(c => !isAvailable(c.id));
+
+  const tbody = document.getElementById('avail-tbody');
+  tbody.innerHTML = filtered.map(car => {
+    const avail = isAvailable(car.id);
+    return `<tr>
+      <td><img src="${car.img}" class="car-thumb" onerror="this.style.background='var(--card2)'"></td>
+      <td><strong>${car.emoji} ${car.name}</strong><div style="font-size:0.72rem;color:var(--gray)">${car.sub}</div></td>
+      <td><span class="badge badge-gray">${car.cls}</span></td>
+      <td><span style="font-family:'Space Mono',monospace;color:var(--gold)">${fmt(car.daily)}</span></td>
+      <td><span class="badge ${avail ? 'badge-green' : 'badge-red'}">${avail ? 'Available' : 'Booked / Unavailable'}</span></td>
+      <td>
+        <button class="avail-toggle ${avail ? 'on' : ''}" onclick="toggleCarAvail(${car.id}, this)" title="${avail ? 'Mark unavailable' : 'Mark available'}"></button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function toggleCarAvail(id, btn) {
+  const ids = getBookedIds();
+  const car = getCars().find(c => c.id === id);
+  if (ids.includes(id)) {
+    saveBookedIds(ids.filter(i => i !== id));
+    btn.classList.add('on');
+    addLog('admin', '✅ Car Made Available', currentAdmin?.name || 'Admin', car?.name || '#' + id);
+    showToast('✅ ' + (car?.name || 'Car') + ' is now available.', 'ok');
+  } else {
+    saveBookedIds([...ids, id]);
+    btn.classList.remove('on');
+    addLog('admin', '🔴 Car Made Unavailable', currentAdmin?.name || 'Admin', car?.name || '#' + id);
+    showToast('🔴 ' + (car?.name || 'Car') + ' marked as unavailable.', 'info');
+  }
+  renderDashboard();
+  updateBadges();
+}
+
+function setAllAvail(avail) {
+  if (!confirm(avail ? 'Mark ALL cars as available?' : 'Mark ALL cars as unavailable?')) return;
+  if (avail) {
+    saveBookedIds([]);
+  } else {
+    saveBookedIds(getCars().map(c => c.id));
+  }
+  addLog('admin', avail ? '✅ All Cars Released' : '🔴 All Cars Locked', currentAdmin?.name || 'Admin', getCars().length + ' vehicles');
+  showToast((avail ? '✅ All cars available.' : '🔴 All cars unavailable.'), avail ? 'ok' : 'info');
+  renderAvailability();
+  renderDashboard();
+}
+
+/* ══════════════════════════════════════════════════════
+   LOGS
+══════════════════════════════════════════════════════ */
+let logsFilter = 'all';
+
+function filterLogs(f, el) {
+  logsFilter = f;
+  document.querySelectorAll('#panel-logs .chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  renderLogs();
+}
+
+function renderLogs() {
+  let list = getLogs();
+  if (logsFilter !== 'all') list = list.filter(l => l.type === logsFilter);
+  const tbody = document.getElementById('logs-tbody');
+  if (!list.length) { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--gray);padding:32px">No logs found.</td></tr>'; return; }
+  const typeColors = { login:'badge-blue', booking:'badge-green', cancel:'badge-red', admin:'badge-gold', refund:'badge-warning' };
+  tbody.innerHTML = list.map(l => `
+    <tr>
+      <td><span class="badge ${typeColors[l.type]||'badge-gray'}">${l.type}</span></td>
+      <td style="font-weight:500">${l.action}</td>
+      <td>${l.user||'—'}</td>
+      <td style="font-size:0.8rem;color:var(--gray)">${l.details||'—'}</td>
+      <td><span style="font-family:'Space Mono',monospace;font-size:0.7rem;color:var(--gray)">${l.ts}</span></td>
+    </tr>`).join('');
+}
+
+function clearLogs() {
+  if (!confirm('Clear all activity logs?')) return;
+  saveLogs([]);
+  addLog('admin', '🗑 Logs Cleared', currentAdmin?.name || 'Admin', '—');
+  renderLogs();
+  showToast('🗑 Logs cleared.', 'info');
+}
+
+/* ══════════════════════════════════════════════════════
+   HELPERS
+══════════════════════════════════════════════════════ */
+function statusBadge(status) {
+  const m = {
+    upcoming:  ['badge-gold', 'Upcoming'],
+    active:    ['badge-green', 'Active'],
+    completed: ['badge-gray', 'Completed'],
+    cancelled: ['badge-red', 'Cancelled'],
+  };
+  const [cls, label] = m[status] || ['badge-gray', status];
+  return `<span class="badge ${cls}">${label}</span>`;
+}
+
+function showToast(msg, type = 'ok') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show ' + type;
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.classList.remove('show'), 3500);
+}
+
+/* Click outside to close modals */
+document.getElementById('carModal').addEventListener('click', function(e) {
+  if (e.target === this) closeCarModal();
+});
+
+/* Check if already logged in this session */
+const savedAdmin = sessionStorage.getItem('veloce_admin');
+if (savedAdmin) {
+  try {
+    currentAdmin = JSON.parse(savedAdmin);
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('appShell').classList.add('visible');
+    document.getElementById('adminName').textContent = currentAdmin.name;
+    document.getElementById('adminAvatar').textContent = currentAdmin.initials;
+    initDashboard();
+  } catch(e) { sessionStorage.removeItem('veloce_admin'); }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,1199 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VELOCE — Browse Our Fleet</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,700;1,300&family=Space+Mono:wght@400;700&display=swap');
+
+        :root {
+            --black: #0a0a0a;
+            --dark: #111111;
+            --card: #181818;
+            --border: #2a2a2a;
+            --red: #e63030;
+            --red-glow: #e6303055;
+            --gold: #c9a84c;
+            --white: #f5f5f0;
+            --gray: #888888;
+            --light: #cccccc;
+            --success: #2ecc71;
+            --warning: #f39c12;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: var(--black);
+            color: var(--white);
+            font-family: 'DM Sans', sans-serif;
+            min-height: 100vh;
+            transition: background .3s, color .3s;
+        }
+
+        body.light {
+            --black: #f0f0eb;
+            --dark: #e8e8e3;
+            --card: #ffffff;
+            --border: #dcdcd7;
+            --white: #111111;
+            --gray: #666666;
+            --light: #444444;
+        }
+
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: var(--dark); }
+        ::-webkit-scrollbar-thumb { background: var(--red); border-radius: 2px; }
+
+        header {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 99999;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 48px;
+            height: 70px;
+            background: rgba(10, 10, 10, 0.98);
+            border-bottom: 1px solid var(--border);
+            backdrop-filter: blur(12px);
+            gap: 16px;
+        }
+
+        body.light header { background: rgba(240, 240, 235, 0.98); }
+
+        .logo {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 2rem;
+            letter-spacing: 6px;
+            color: var(--white);
+            text-decoration: none;
+        }
+        .logo span { color: var(--red); }
+
+        nav { display: flex; gap: 6px; flex: 1; justify-content: center; }
+        nav a {
+            color: var(--gray);
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.82rem;
+            font-weight: 500;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            padding: 7px 14px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all .2s;
+            text-decoration: none;
+        }
+        nav a:hover { color: var(--white); background: var(--border); }
+        nav a.active { color: var(--red); background: var(--border); }
+
+        .header-actions { display: flex; align-items: center; gap: 10px; }
+
+        .theme-btn {
+            background: none;
+            border: 1px solid var(--border);
+            color: var(--gray);
+            width: 36px; height: 36px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1rem;
+            display: flex; align-items: center; justify-content: center;
+            transition: all .2s;
+        }
+        .theme-btn:hover { border-color: var(--red); color: var(--white); }
+
+        .profile-circle {
+            width: 40px; height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--red), #a00);
+            display: flex; align-items: center; justify-content: center;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.75rem; font-weight: 700;
+            color: white;
+            cursor: pointer;
+            border: 2px solid var(--border);
+            position: relative;
+            transition: all .2s;
+            flex-shrink: 0;
+        }
+        .profile-circle:hover { border-color: var(--red); box-shadow: 0 0 16px var(--red-glow); }
+
+        .profile-online {
+            position: absolute; bottom: 1px; right: 1px;
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            background: var(--success);
+            border: 2px solid var(--black);
+        }
+
+        main { padding-top: 70px; }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 4px;
+            font-family: 'DM Sans', sans-serif;
+            font-weight: 700;
+            font-size: 0.8rem;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all .2s;
+            border: none;
+        }
+        .btn-red { background: var(--red); color: white; }
+        .btn-red:hover { background: #ff4040; box-shadow: 0 0 16px var(--red-glow); }
+        .btn-outline { background: transparent; color: var(--white); border: 1px solid var(--border); }
+        .btn-outline:hover { border-color: var(--red); color: var(--red); }
+        .btn:disabled { opacity: .4; cursor: not-allowed; }
+
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+        .stat-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            transition: border-color .2s;
+        }
+        .stat-card:hover { border-color: var(--red); }
+        .stat-num { font-family: 'Bebas Neue', sans-serif; font-size: 2.8rem; color: var(--red); line-height: 1; }
+        .stat-lbl { font-size: .75rem; color: var(--gray); text-transform: uppercase; letter-spacing: 2px; margin-top: 6px; }
+
+        .search-bar { position: relative; margin-bottom: 20px; }
+        .search-bar input {
+            width: 100%;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--white);
+            font-family: 'DM Sans', sans-serif;
+            font-size: .95rem;
+            padding: 14px 48px 14px 18px;
+            outline: none;
+            transition: border-color .2s;
+        }
+        .search-bar input:focus { border-color: var(--red); }
+        .search-bar input::placeholder { color: var(--gray); }
+        .search-bar .search-icon {
+            position: absolute; right: 16px; top: 50%;
+            transform: translateY(-50%);
+            color: var(--gray); font-size: 1.1rem; pointer-events: none;
+        }
+
+        .section-header { display: flex; align-items: baseline; gap: 16px; margin-bottom: 28px; }
+        .section-header h2 { font-family: 'Bebas Neue', sans-serif; font-size: 2.8rem; letter-spacing: 3px; color: var(--white); }
+        .section-header span { font-family: 'Space Mono', monospace; font-size: .72rem; color: var(--red); letter-spacing: 3px; text-transform: uppercase; }
+
+        .filters { display: flex; gap: 10px; margin-bottom: 32px; flex-wrap: wrap; align-items: center; }
+        .filter-chip {
+            padding: 7px 16px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            background: transparent;
+            color: var(--gray);
+            font-family: 'DM Sans', sans-serif;
+            font-size: .82rem;
+            cursor: pointer;
+            transition: all .2s;
+        }
+        .filter-chip:hover, .filter-chip.active { border-color: var(--red); color: var(--red); background: rgba(230,48,48,.08); }
+
+        .sort-select {
+            margin-left: auto;
+            background: var(--card);
+            border: 1px solid var(--border);
+            color: var(--gray);
+            font-family: 'DM Sans', sans-serif;
+            font-size: .82rem;
+            padding: 7px 14px;
+            border-radius: 20px;
+            cursor: pointer;
+            outline: none;
+            transition: border-color .2s;
+        }
+        .sort-select:hover, .sort-select:focus { border-color: var(--red); }
+
+        .car-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 24px; }
+
+        .car-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            overflow: hidden;
+            transition: all .3s;
+            cursor: pointer;
+            position: relative;
+        }
+        .car-card:hover { border-color: var(--red); transform: translateY(-4px); box-shadow: 0 12px 40px rgba(230,48,48,.15); }
+
+        .car-img-wrap {
+            height: 190px;
+            position: relative; overflow: hidden;
+            background: linear-gradient(135deg, #1a1a1a, #222);
+            display: flex; align-items: center; justify-content: center;
+        }
+        .car-real-img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .4s ease; }
+        .car-card:hover .car-real-img { transform: scale(1.05); }
+        .car-img-wrap::after {
+            content: '';
+            position: absolute; bottom: 0; left: 0; right: 0;
+            height: 70px;
+            background: linear-gradient(transparent, var(--card));
+            pointer-events: none;
+        }
+
+        .badge {
+            position: absolute; top: 12px; right: 12px;
+            padding: 4px 10px;
+            border-radius: 3px;
+            font-family: 'Space Mono', monospace;
+            font-size: .62rem; font-weight: 700;
+            letter-spacing: 1px; text-transform: uppercase;
+            z-index: 2;
+        }
+        .badge.available { background: rgba(46,204,113,.15); color: var(--success); border: 1px solid rgba(46,204,113,.3); }
+        .badge.booked { background: rgba(230,48,48,.15); color: var(--red); border: 1px solid rgba(230,48,48,.3); }
+
+        .car-info { padding: 18px; }
+        .car-class { font-family: 'Space Mono', monospace; font-size: .62rem; color: var(--red); letter-spacing: 3px; text-transform: uppercase; margin-bottom: 5px; }
+        .car-name { font-size: 1.15rem; font-weight: 700; color: var(--white); margin-bottom: 3px; }
+        .car-sub { font-size: .8rem; color: var(--gray); margin-bottom: 14px; }
+
+        .car-specs {
+            display: flex; gap: 12px; margin-bottom: 16px;
+            padding: 10px 0;
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+        }
+        .spec { text-align: center; flex: 1; }
+        .spec-val { font-family: 'Space Mono', monospace; font-size: .82rem; color: var(--white); font-weight: 700; }
+        .spec-lbl { font-size: .62rem; color: var(--gray); text-transform: uppercase; letter-spacing: 1px; margin-top: 2px; }
+
+        .car-pricing { display: flex; gap: 8px; margin-bottom: 14px; }
+        .car-price-opt {
+            flex: 1; text-align: center; padding: 7px 4px;
+            border-radius: 6px;
+            background: rgba(42,42,42,.5);
+            border: 1px solid transparent;
+        }
+        .car-price-opt.best { border-color: var(--gold); background: rgba(201,168,76,.08); }
+        .p-label { font-size: .58rem; color: var(--gray); text-transform: uppercase; letter-spacing: 1px; display: block; }
+        .p-amount { font-family: 'Bebas Neue', sans-serif; font-size: 1rem; color: var(--white); }
+        .car-price-opt.best .p-amount { color: var(--gold); }
+        .p-save { font-size: .55rem; color: var(--success); }
+
+        .car-footer { display: flex; align-items: center; justify-content: space-between; }
+        .price-tag { display: flex; align-items: baseline; gap: 4px; }
+        .price-amount { font-family: 'Bebas Neue', sans-serif; font-size: 1.8rem; color: var(--gold); }
+        .price-unit { font-size: .75rem; color: var(--gray); }
+
+        /* MODAL */
+        .modal-overlay {
+            display: none;
+            position: fixed; inset: 0; z-index: 200;
+            background: rgba(0,0,0,.85);
+            backdrop-filter: blur(8px);
+            align-items: center; justify-content: center;
+        }
+        .modal-overlay.open { display: flex; animation: fadeIn .2s ease; }
+        .modal {
+            background: var(--dark);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            width: 580px; max-width: 95vw; max-height: 90vh;
+            overflow-y: auto;
+        }
+        .modal-header {
+            padding: 24px 28px 18px;
+            display: flex; align-items: center; justify-content: space-between;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 24px;
+        }
+        .modal-header h3 { font-family: 'Bebas Neue', sans-serif; font-size: 1.7rem; letter-spacing: 2px; }
+        .modal-close { background: none; border: none; color: var(--gray); font-size: 1.4rem; cursor: pointer; transition: color .2s; padding: 4px; }
+        .modal-close:hover { color: var(--red); }
+        .modal-body { padding: 0 28px 28px; }
+
+        .modal-car-banner { height: 140px; border-radius: 8px; overflow: hidden; margin-bottom: 18px; position: relative; }
+        .modal-car-banner img { width: 100%; height: 100%; object-fit: cover; }
+        .modal-car-banner .banner-info {
+            position: absolute; bottom: 0; left: 0; right: 0;
+            padding: 12px 16px;
+            background: linear-gradient(transparent, rgba(0,0,0,.8));
+        }
+
+        .form-group { margin-bottom: 18px; }
+        .form-group label {
+            display: block;
+            font-family: 'Space Mono', monospace;
+            font-size: .62rem; letter-spacing: 2px; text-transform: uppercase;
+            color: var(--gray); margin-bottom: 7px;
+        }
+        .form-group input, .form-group select {
+            width: 100%;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--white);
+            font-family: 'DM Sans', sans-serif;
+            font-size: .92rem;
+            padding: 11px 14px;
+            outline: none;
+            transition: border-color .2s;
+            appearance: none;
+        }
+        .form-group input:focus, .form-group select:focus { border-color: var(--red); }
+        .form-group select option { background: var(--card); }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+        .price-summary {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 18px;
+            margin: 20px 0;
+        }
+        .price-row { display: flex; justify-content: space-between; padding: 7px 0; font-size: .88rem; color: var(--light); }
+        .price-row.total { border-top: 1px solid var(--border); margin-top: 6px; padding-top: 14px; font-weight: 700; color: var(--white); font-size: 1rem; }
+        .price-row.total .amount { color: var(--gold); font-family: 'Space Mono', monospace; }
+
+        .dur-tabs { display: flex; gap: 8px; margin-bottom: 4px; }
+        .dur-tab {
+            flex: 1; padding: 10px 6px;
+            border-radius: 7px;
+            border: 1px solid var(--border);
+            background: var(--card);
+            color: var(--gray);
+            cursor: pointer; transition: all .2s; text-align: center;
+        }
+        .dur-tab:hover { border-color: var(--red); color: var(--white); }
+        .dur-tab.active { border-color: var(--red); background: rgba(230,48,48,.12); color: var(--red); }
+        .dur-tab .d-label { display: block; font-size: .62rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 3px; }
+        .dur-tab .d-price { font-family: 'Bebas Neue', sans-serif; font-size: 1.25rem; color: inherit; }
+        .dur-tab .d-save { font-size: .58rem; color: var(--success); }
+
+        /* PROFILE MENU */
+        .profile-menu {
+            position: fixed; top: 78px; left: 24px;
+            width: 290px;
+            background: var(--dark);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0,0,0,.7);
+            z-index: 300;
+            display: none;
+        }
+        .profile-menu.open { display: block; animation: fadeIn .2s ease; }
+
+        .profile-menu-header {
+            display: flex; gap: 14px; align-items: center;
+            padding: 18px;
+            background: linear-gradient(135deg, #1a0505, #1a1a1a);
+            border-bottom: 1px solid var(--border);
+            border-radius: 12px 12px 0 0;
+        }
+        .profile-avatar-lg {
+            width: 48px; height: 48px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--red), #a00);
+            display: flex; align-items: center; justify-content: center;
+            font-family: 'Space Mono', monospace;
+            font-size: .9rem; font-weight: 700; color: white;
+            flex-shrink: 0;
+        }
+        .profile-fullname { font-weight: 700; font-size: .9rem; color: var(--white); }
+        .profile-email { font-size: .72rem; color: var(--gray); margin-top: 2px; }
+        .profile-badge {
+            display: inline-block; margin-top: 5px;
+            font-family: 'Space Mono', monospace;
+            font-size: .58rem; letter-spacing: 1px; text-transform: uppercase;
+            padding: 3px 8px; border-radius: 3px;
+            background: rgba(201,168,76,.15); color: var(--gold);
+            border: 1px solid rgba(201,168,76,.3);
+        }
+        .profile-menu-stats { display: flex; border-bottom: 1px solid var(--border); }
+        .pm-stat { flex: 1; text-align: center; padding: 12px 8px; border-right: 1px solid var(--border); }
+        .pm-stat:last-child { border-right: none; }
+        .pm-val { font-family: 'Bebas Neue', sans-serif; font-size: 1.2rem; color: var(--red); line-height: 1; }
+        .pm-lbl { font-size: .6rem; color: var(--gray); text-transform: uppercase; letter-spacing: 1px; margin-top: 3px; }
+        .profile-menu-items { padding: 8px; }
+        .pm-item { padding: 10px 14px; border-radius: 6px; cursor: pointer; font-size: .84rem; color: var(--light); transition: all .15s; }
+        .pm-item:hover { background: var(--border); color: var(--white); }
+        .pm-logout { color: var(--gray); }
+        .pm-logout:hover { background: rgba(230,48,48,.1); color: var(--red); }
+
+        .profile-avatar-xl {
+            width: 76px; height: 76px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--red), #a00);
+            display: flex; align-items: center; justify-content: center;
+            font-family: 'Space Mono', monospace;
+            font-size: 1.3rem; font-weight: 700; color: white;
+            border: 3px solid rgba(230,48,48,.4);
+            box-shadow: 0 0 24px var(--red-glow);
+        }
+
+        /* AUTH */
+        .signup-overlay {
+            position: fixed; inset: 0; z-index: 500;
+            background: rgba(0,0,0,.85);
+            backdrop-filter: blur(6px);
+            display: flex; align-items: center; justify-content: center;
+            opacity: 0; pointer-events: none; transition: opacity .3s;
+            padding: 20px; overflow: auto;
+        }
+        .signup-overlay.open { opacity: 1; pointer-events: all; }
+        .signup-box {
+            background: var(--dark);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            width: 100%; max-width: 480px;
+            overflow-y: auto;
+            box-shadow: 0 30px 80px rgba(0,0,0,.8);
+            transform: translateY(20px); transition: transform .3s;
+            max-height: 90vh; margin: auto;
+        }
+        .signup-overlay.open .signup-box { transform: translateY(0); }
+        .signup-top {
+            background: linear-gradient(135deg, #1a0505, #181818);
+            padding: 32px 36px 24px;
+            text-align: center;
+            border-bottom: 1px solid var(--border);
+            position: relative;
+        }
+        .signup-close {
+            position: absolute; top: 14px; right: 16px;
+            background: none; border: none; color: var(--gray);
+            font-size: 1.2rem; cursor: pointer; transition: color .2s;
+            width: 30px; height: 30px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .signup-close:hover { color: var(--white); background: var(--border); }
+        .signup-logo { font-family: 'Bebas Neue', sans-serif; font-size: 2rem; letter-spacing: 6px; color: var(--white); margin-bottom: 5px; }
+        .signup-logo span { color: var(--red); }
+        .signup-tagline { font-size: .8rem; color: var(--gray); letter-spacing: 1px; }
+        .signup-body { padding: 28px 36px; }
+        .signup-tabs { display: flex; background: var(--black); border-radius: 8px; padding: 4px; margin-bottom: 24px; gap: 4px; }
+        .stab {
+            flex: 1; text-align: center; padding: 8px;
+            border-radius: 6px; cursor: pointer;
+            font-size: .8rem; font-weight: 600; letter-spacing: 1px; text-transform: uppercase;
+            color: var(--gray); transition: all .2s;
+            border: none; background: none;
+            font-family: 'DM Sans', sans-serif;
+        }
+        .stab.active { background: var(--red); color: var(--white); }
+        .signup-panel { display: none; }
+        .signup-panel.active { display: block; animation: fadeIn .25s ease; }
+
+        .signup-divider { display: flex; align-items: center; gap: 12px; margin: 18px 0; }
+        .signup-divider::before, .signup-divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+        .signup-divider span { font-size: .7rem; color: var(--gray); letter-spacing: 2px; }
+
+        .social-btn {
+            width: 100%; padding: 10px; border-radius: 8px;
+            border: 1px solid var(--border); background: var(--card);
+            color: var(--light); font-family: 'DM Sans', sans-serif; font-size: .84rem;
+            cursor: pointer; transition: all .2s;
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+            margin-bottom: 10px;
+        }
+        .social-btn:hover { border-color: #444; background: #222; color: var(--white); }
+
+        .signup-footer { text-align: center; margin-top: 18px; font-size: .76rem; color: var(--gray); }
+        .signup-footer a { color: var(--red); cursor: pointer; }
+
+        .signup-success { text-align: center; padding: 20px 0; }
+        .signup-success .s-icon { font-size: 3.5rem; margin-bottom: 14px; }
+        .signup-success h3 { font-family: 'Bebas Neue', sans-serif; font-size: 1.9rem; letter-spacing: 3px; color: var(--white); margin-bottom: 10px; }
+        .signup-success p { color: var(--gray); font-size: .86rem; line-height: 1.6; }
+
+        .strength-bar { height: 3px; background: var(--border); border-radius: 2px; margin-top: 5px; overflow: hidden; }
+        .strength-fill { height: 100%; width: 0; border-radius: 2px; transition: width .3s, background .3s; }
+        .strength-label { font-size: .68rem; color: var(--gray); margin-top: 3px; }
+
+        .input-icon-wrap { position: relative; }
+        .input-icon-wrap .i-icon { position: absolute; left: 13px; top: 50%; transform: translateY(-50%); font-size: .9rem; pointer-events: none; }
+        .input-icon-wrap input { padding-left: 36px; }
+
+        /* TOAST */
+        .toast {
+            position: fixed; bottom: 28px; right: 28px;
+            background: var(--card);
+            border: 1px solid var(--success);
+            color: var(--success);
+            padding: 14px 22px; border-radius: 8px;
+            font-size: .88rem; font-family: 'Space Mono', monospace;
+            z-index: 9999; display: none;
+            box-shadow: 0 8px 32px rgba(0,0,0,.5);
+            max-width: 320px;
+        }
+        .toast.show { display: block; animation: slideUp .3s ease; }
+        .toast.error { border-color: var(--red); color: var(--red); }
+        .toast.warn { border-color: var(--warning); color: var(--warning); }
+
+        .empty-state { text-align: center; padding: 60px 20px; color: var(--gray); grid-column: 1/-1; }
+        .empty-state .icon { font-size: 3rem; margin-bottom: 14px; opacity: .5; }
+        .empty-state p { font-size: .95rem; }
+
+        /* FOOTER */
+        footer { background: #0a0a0a; border-top: 1px solid var(--border); padding: 48px 48px 28px; margin-top: 0; }
+        .footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 40px; margin-bottom: 40px; }
+        .footer-brand-logo { font-family: 'Bebas Neue', sans-serif; font-size: 2.2rem; letter-spacing: 6px; color: var(--white); margin-bottom: 12px; }
+        .footer-brand-logo span { color: var(--red); }
+        .footer-brand-desc { font-size: .83rem; color: var(--gray); line-height: 1.75; max-width: 260px; margin-bottom: 20px; }
+        .footer-col-title { font-family: 'Space Mono', monospace; font-size: .65rem; letter-spacing: 3px; text-transform: uppercase; color: var(--white); margin-bottom: 16px; }
+        .footer-links { display: flex; flex-direction: column; gap: 10px; }
+        .footer-link { font-size: .83rem; color: var(--gray); text-decoration: none; cursor: pointer; transition: color .2s; }
+        .footer-link:hover { color: var(--white); }
+        .footer-contact-item { display: flex; align-items: flex-start; gap: 10px; font-size: .81rem; color: var(--gray); margin-bottom: 10px; }
+        .footer-contact-item span:first-child { color: var(--red); flex-shrink: 0; }
+
+        .footer-bottom { border-top: 1px solid var(--border); padding-top: 24px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px; }
+        .footer-bottom-left { font-size: .76rem; color: var(--gray); }
+        .footer-bottom-left span { color: var(--red); }
+        .footer-bottom-links { display: flex; gap: 20px; }
+        .footer-bottom-link { font-size: .73rem; color: var(--gray); cursor: pointer; transition: color .2s; }
+        .footer-bottom-link:hover { color: var(--white); }
+
+        .footer-nl {
+            background: var(--card); border: 1px solid var(--border);
+            border-radius: 10px; padding: 24px 40px;
+            display: flex; align-items: center; justify-content: space-between;
+            gap: 28px; margin-bottom: 48px;
+        }
+        .footer-nl-title { font-family: 'Bebas Neue', sans-serif; font-size: 1.5rem; letter-spacing: 3px; color: var(--white); margin-bottom: 5px; }
+        .footer-nl-sub { font-size: .8rem; color: var(--gray); }
+        .footer-nl-form { display: flex; gap: 10px; flex-shrink: 0; }
+        .footer-nl-form input {
+            background: var(--dark); border: 1px solid var(--border);
+            color: var(--white); padding: 10px 16px; border-radius: 6px;
+            font-family: 'DM Sans', sans-serif; font-size: .83rem;
+            width: 210px; outline: none; transition: border-color .2s;
+        }
+        .footer-nl-form input:focus { border-color: var(--red); }
+        .footer-nl-form input::placeholder { color: var(--gray); }
+
+        .footer-badge {
+            display: inline-flex; align-items: center; gap: 6px;
+            font-family: 'Space Mono', monospace; font-size: .6rem; letter-spacing: 1.5px; text-transform: uppercase;
+            padding: 4px 10px; border-radius: 4px;
+            background: rgba(46,204,113,.1); color: var(--success);
+            border: 1px solid rgba(46,204,113,.25); margin-bottom: 7px;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px) } to { opacity: 1; transform: translateY(0) } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px) } to { opacity: 1; transform: translateY(0) } }
+
+        @media(max-width:768px) {
+            header { padding: 0 16px; }
+            nav a { font-size: .72rem; padding: 6px 9px; }
+            .stats-row { grid-template-columns: repeat(2, 1fr); }
+            .car-grid { grid-template-columns: 1fr; }
+            .form-row { grid-template-columns: 1fr; }
+            footer { padding: 36px 20px 20px; }
+            .footer-grid { grid-template-columns: 1fr 1fr; gap: 24px; }
+            .footer-nl { flex-direction: column; padding: 20px; }
+            .footer-nl-form { flex-direction: column; width: 100%; }
+            .footer-nl-form input { width: 100%; }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <a href="/home2" class="logo">VELO<span>CE</span></a>
+        <nav>
+            <a href="/home2">Home</a>
+            <a href="/cars" class="active">Cars</a>
+            <a href="/availability">Availability</a>
+            <a href="/mybooking">My Bookings</a>
+            <a href="/about">About</a>
+        </nav>
+        <div class="header-actions">
+            <button class="theme-btn" id="themeBtn" onclick="toggleTheme()" title="Toggle theme">🌙</button>
+            <div class="profile-circle" id="headerProfileCircle" onclick="toggleProfileMenu()">
+                JD<div class="profile-online"></div>
+            </div>
+        </div>
+    </header>
+
+    <main style="padding:100px 48px 48px">
+        <div class="stats-row">
+            <div class="stat-card">
+                <div class="stat-num" id="stat-total">48</div>
+                <div class="stat-lbl">Total Fleet</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-num" id="stat-avail" style="color:var(--success)">—</div>
+                <div class="stat-lbl">Available Now</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-num" id="stat-booked" style="color:var(--red)">—</div>
+                <div class="stat-lbl">Booked</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-num" id="stat-mybookings" style="color:var(--gold)">0</div>
+                <div class="stat-lbl">My Bookings</div>
+            </div>
+        </div>
+
+        <div class="section-header">
+            <h2>OUR FLEET</h2><span>// Select a vehicle</span>
+        </div>
+
+        <div class="search-bar">
+            <input type="text" id="searchInput" placeholder="Search by car name, brand, or type…" oninput="renderCars()">
+            <span class="search-icon">🔍</span>
+        </div>
+
+        <div class="filters">
+            <button class="filter-chip active" data-filter="all" onclick="filterCars('all',this)">All Vehicles</button>
+            <button class="filter-chip" data-filter="Sport" onclick="filterCars('Sport',this)">⚡ Sport</button>
+            <button class="filter-chip" data-filter="Luxury" onclick="filterCars('Luxury',this)">✨ Luxury</button>
+            <button class="filter-chip" data-filter="SUV" onclick="filterCars('SUV',this)">🚙 SUV</button>
+            <button class="filter-chip" data-filter="Sedan" onclick="filterCars('Sedan',this)">🚗 Sedan</button>
+            <button class="filter-chip" data-filter="Electric" onclick="filterCars('Electric',this)">🔋 Electric</button>
+            <button class="filter-chip" data-filter="available" onclick="filterCars('available',this)">✅ Available Only</button>
+            <select class="sort-select" id="sortSelect" onchange="renderCars()">
+                <option value="default">Sort: Default</option>
+                <option value="price-asc">Price: Low → High</option>
+                <option value="price-desc">Price: High → Low</option>
+                <option value="name-asc">Name: A → Z</option>
+            </select>
+        </div>
+
+        <div class="car-grid" id="carGrid"></div>
+    </main>
+
+    <footer>
+        <div class="footer-nl">
+            <div>
+                <div class="footer-badge">🔔 Stay Updated</div>
+                <div class="footer-nl-title">GET EXCLUSIVE DEALS</div>
+                <div class="footer-nl-sub">Subscribe for early access and members-only discounts.</div>
+            </div>
+            <!-- ✅ Newsletter form: action="/newsletter/subscribe" method="POST" -->
+            <form action="/newsletter/subscribe" method="POST" class="footer-nl-form" onsubmit="event.preventDefault();subscribeNewsletter()">
+                <input type="email" id="nlEmail" name="email" placeholder="Enter your email…" required>
+                <button type="submit" class="btn btn-red" style="padding:10px 20px;white-space:nowrap">Subscribe →</button>
+            </form>
+        </div>
+        <div class="footer-grid">
+            <div>
+                <div class="footer-brand-logo">VELO<span>CE</span></div>
+                <div class="footer-brand-desc">Hyderabad's most premium car rental service. Hand-curated fleet — booked in minutes.</div>
+            </div>
+            <div>
+                <div class="footer-col-title">// Fleet</div>
+                <div class="footer-links">
+                    <a class="footer-link" href="#">⚡ Sport Cars</a>
+                    <a class="footer-link" href="#">✨ Luxury Cars</a>
+                    <a class="footer-link" href="#">🚙 SUVs</a>
+                    <a class="footer-link" href="#">🚗 Sedans</a>
+                    <a class="footer-link" href="#">🔋 Electric</a>
+                </div>
+            </div>
+            <div>
+                <div class="footer-col-title">// Company</div>
+                <div class="footer-links">
+                    <a class="footer-link" href="/about">🏢 About Veloce</a>
+                    <a class="footer-link" href="/mybooking">📋 My Bookings</a>
+                    <a class="footer-link" href="/availability">🔍 Availability</a>
+                </div>
+            </div>
+            <div>
+                <div class="footer-col-title">// Contact</div>
+                <div class="footer-contact-item"><span>📞</span><span>+91 9603847168</span></div>
+                <div class="footer-contact-item"><span>📞</span><span>+91 81849 41066</span></div>
+                <div class="footer-contact-item"><span>✉️</span><span>hello@veloce.in</span></div>
+                <div class="footer-contact-item"><span>📍</span><span>Jubilee Hills · HITEC City · Airport</span></div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <div class="footer-bottom-left">© 2025 <span>Veloce Premium Rentals</span> · All rights reserved</div>
+            <div class="footer-bottom-links">
+                <span class="footer-bottom-link">Privacy Policy</span>
+                <span class="footer-bottom-link">Terms of Service</span>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const CARS = [
+            { id: 1, name: "Ferrari 488 GTB", sub: "2023 • V8 Turbo", cls: "Sport", emoji: "🏎️", img: "https://images.unsplash.com/photo-1592198084033-aade902d1aae?w=600&h=280&fit=crop&q=80", seats: 2, fuel: "Petrol", trans: "Auto", daily: 8500 },
+            { id: 2, name: "Mercedes S-Class", sub: "2024 • AMG Line", cls: "Luxury", emoji: "🚘", img: "https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?w=600&h=280&fit=crop&q=80", seats: 5, fuel: "Diesel", trans: "Auto", daily: 5500 },
+            { id: 3, name: "Porsche Cayenne", sub: "2023 • Turbo S", cls: "SUV", emoji: "🚙", img: "https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=600&h=280&fit=crop&q=80", seats: 5, fuel: "Petrol", trans: "Auto", daily: 6500 },
+            { id: 4, name: "BMW M4 Competition", sub: "2023 • Twin Turbo", cls: "Sport", emoji: "🚗", img: "https://images.unsplash.com/photo-1555215695-3004980ad54e?w=600&h=280&fit=crop&q=80", seats: 4, fuel: "Petrol", trans: "Manual", daily: 7200 },
+            { id: 5, name: "Tesla Model S", sub: "2024 • Plaid", cls: "Electric", emoji: "⚡", img: "https://images.unsplash.com/photo-1560958089-b8a1929cea89?w=600&h=280&fit=crop&q=80", seats: 5, fuel: "Electric", trans: "Auto", daily: 5000 },
+            { id: 6, name: "Range Rover Sport", sub: "2024 • HSE", cls: "SUV", emoji: "🏔️", img: "https://images.unsplash.com/photo-1606016159991-dfe4f2746ad5?w=600&h=280&fit=crop&q=80", seats: 7, fuel: "Diesel", trans: "Auto", daily: 7800 },
+            { id: 7, name: "Audi A8 L", sub: "2023 • TDI Quattro", cls: "Luxury", emoji: "🎩", img: "https://images.unsplash.com/photo-1606152421802-db97b9c7a11b?w=600&h=280&fit=crop&q=80", seats: 5, fuel: "Diesel", trans: "Auto", daily: 4800 },
+            { id: 8, name: "Lamborghini Urus", sub: "2024 • Performante", cls: "SUV", emoji: "🦁", img: "https://images.unsplash.com/photo-1544636331-e26879cd4d9b?w=600&h=280&fit=crop&q=80", seats: 5, fuel: "Petrol", trans: "Auto", daily: 12000 },
+            { id: 9, name: "Hyundai Creta", sub: "2024 • SX Turbo", cls: "SUV", emoji: "🌟", img: "https://images.unsplash.com/photo-1609521263047-f8f205293f24?w=600&h=280&fit=crop&q=80", seats: 5, fuel: "Petrol", trans: "Auto", daily: 1800 },
+            { id: 10, name: "Toyota Camry", sub: "2024 • Hybrid", cls: "Sedan", emoji: "🍃", img: "https://images.unsplash.com/photo-1621007947382-bb3c3994e3fb?w=600&h=280&fit=crop&q=80", seats: 5, fuel: "Hybrid", trans: "Auto", daily: 2400 },
+            { id:11, name:"Tata Nexon EV",          sub:"2024 • Max Long Range",        cls:"Electric",emoji:"🔋", img:"https://images.pexels.com/photos/9031387/pexels-photo-9031387.jpeg", seats:5, fuel:"Electric", trans:"Auto",   daily:1600  },
+            { id: 12, name: "Honda City", sub: "2024 • ZX CVT", cls: "Sedan", emoji: "🚕", img: "https://images.unsplash.com/photo-1617469767053-d3b523a0b982?w=600&h=280&fit=crop&q=80", seats: 5, fuel: "Petrol", trans: "Auto", daily: 1400 },
+            { id: 13, name: "Rolls-Royce Ghost", sub: "2024 • Extended Wheelbase", cls: "Luxury", emoji: "👑", img: "https://images.unsplash.com/photo-1631295868223-63265b40d9e4?w=600&h=280&fit=crop&q=80", seats: 5, fuel: "Petrol", trans: "Auto", daily: 28000 },
+            { id: 14, name: "Bentley Continental GT", sub: "2023 • W12 Speed", cls: "Luxury", emoji: "🦅", img: "https://images.unsplash.com/photo-1580414057403-c5f451f30e1c?w=600&h=280&fit=crop&q=80", seats: 4, fuel: "Petrol", trans: "Auto", daily: 22000 },
+            { id:15, name:"McLaren 720S",           sub:"2023 • Spider",                cls:"Sport",   emoji:"🦋", img:"https://images.pexels.com/photos/29918150/pexels-photo-29918150.jpeg", seats:2, fuel:"Petrol",   trans:"Auto",   daily:16500 },
+            { id:16, name:"Bugatti Chiron",         sub:"2024 • Sport",                 cls:"Sport",   emoji:"🐝", img:"https://images.pexels.com/photos/12351384/pexels-photo-12351384.jpeg", seats:2, fuel:"Petrol",   trans:"Auto",   daily:45000 },
+            { id: 17, name: "Aston Martin DBX", sub: "2023 • 707", cls: "SUV", emoji: "🏰", img: "https://images.unsplash.com/photo-1580273916550-e323be2ae537?w=600&h=280&fit=crop&q=80", seats: 5, fuel: "Petrol", trans: "Auto", daily: 14000 },
+            { id: 18, name: "Porsche 911 GT3", sub: "2024 • RS Touring", cls: "Sport", emoji: "🐎", img: "https://images.unsplash.com/photo-1614162692292-7ac56d7f7f1e?w=600&h=280&fit=crop&q=80", seats: 2, fuel: "Petrol", trans: "Manual", daily: 13500 },
+            { id:19, name:"Tesla Model X",          sub:"2024 • Plaid AWD",             cls:"Electric",emoji:"🛸", img:"https://images.pexels.com/photos/28576666/pexels-photo-28576666.jpeg", seats:7, fuel:"Electric", trans:"Auto",   daily:6200  },
+            { id:20, name:"Rivian R1T",             sub:"2024 • Adventure",             cls:"SUV",     emoji:"⛺", img:"https://images.pexels.com/photos/35557255/pexels-photo-35557255.jpeg", seats:5, fuel:"Electric", trans:"Auto",   daily:5800  },
+            { id: 21, name: "Jeep Wrangler", sub: "2024 • Rubicon 4xe", cls: "SUV", emoji: "🏕️", img: "https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?w=600&h=280&fit=crop&q=80", seats: 5, fuel: "Hybrid", trans: "Auto", daily: 4200 },
+            { id: 22, name: "Ford Mustang GT500", sub: "2023 • Shelby", cls: "Sport", emoji: "🐴", img: "https://images.unsplash.com/photo-1547744152-14d985cb937f?w=600&h=280&fit=crop&q=80", seats: 4, fuel: "Petrol", trans: "Manual", daily: 9800 },
+            { id: 23, name: "Volkswagen Tiguan", sub: "2024 • R-Line", cls: "SUV", emoji: "🐯", img: "https://images.unsplash.com/photo-1504215680853-026ed2a45def?w=600&h=280&fit=crop&q=80", seats: 7, fuel: "Diesel", trans: "Auto", daily: 3200 },
+            { id: 24, name: "Kia EV6 GT", sub: "2024 • AWD", cls: "Electric", emoji: "⚡", img: "https://images.unsplash.com/photo-1629897048514-3dd7414fe72a?w=600&h=280&fit=crop&q=80", seats: 5, fuel: "Electric", trans: "Auto", daily: 3800 },
+            { id: 25, name: "Maserati GranTurismo", sub: "2024 • Folgore", cls: "Luxury", emoji: "🔱", img: "https://images.unsplash.com/photo-1563720223185-11003d516935?w=600&h=280&fit=crop&q=80", seats: 4, fuel: "Electric", trans: "Auto", daily: 18000 },
+            { id: 26, name: "Chevrolet Corvette", sub: "2024 • Z06 Convertible", cls: "Sport", emoji: "🌊", img: "https://images.unsplash.com/photo-1600712242805-5f78671b24da?w=600&h=280&fit=crop&q=80", seats: 2, fuel: "Petrol", trans: "Auto", daily: 11000 },
+            { id: 27, name: "Land Rover Defender", sub: "2024 • 130 X", cls: "SUV", emoji: "🦁", img: "https://images.unsplash.com/photo-1616422285623-13ff0162193c?w=600&h=280&fit=crop&q=80", seats: 8, fuel: "Diesel", trans: "Auto", daily: 8200 },
+            { id: 28, name: "Toyota Land Cruiser", sub: "2024 • GR Sport", cls: "SUV", emoji: "🏔️", img: "https://images.pexels.com/photos/18029607/pexels-photo-18029607.jpeg", seats: 7, fuel: "Diesel", trans: "Auto", daily: 6800 },
+            { id: 29, name: "BMW i7", sub: "2024 • M70 xDrive", cls: "Electric", emoji: "🌀", img: "https://images.pexels.com/photos/12365935/pexels-photo-12365935.jpeg", seats: 5, fuel: "Electric", trans: "Auto", daily: 9500 },
+            { id: 30, name: "Mercedes EQS AMG", sub: "2024 • 53 4MATIC+", cls: "Electric", emoji: "💎", img: "https://images.pexels.com/photos/29779238/pexels-photo-29779238.jpeg", seats: 5, fuel: "Electric", trans: "Auto", daily: 8800 },
+            { id: 31, name: "Maruti Suzuki Baleno", sub: "2024 • Alpha CVT", cls: "Sedan", emoji: "🌸", img: "https://images.unsplash.com/photo-1609521263047-f8f205293f24?w=600&h=280&fit=crop&q=80", seats: 5, fuel: "Petrol", trans: "Auto", daily: 1100 },
+            { id: 32, name: "Mahindra Thar", sub: "2024 • LX 4WD Hard Top", cls: "SUV", emoji: "🌵", img: "https://images.pexels.com/photos/34940284/pexels-photo-34940284.jpeg", seats: 4, fuel: "Diesel", trans: "Manual", daily: 2800 },
+            { id: 33, name: "Lamborghini Huracan", sub: "2024 • STO", cls: "Sport", emoji: "🔥", img: "https://images.pexels.com/photos/29884349/pexels-photo-29884349.jpeg", seats: 2, fuel: "Petrol", trans: "Auto", daily: 19000 },
+            { id: 34, name: "Jaguar F-Type", sub: "2024 • R Coupe", cls: "Sport", emoji: "🐆", img: "https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=600&h=280&fit=crop&q=80", seats: 2, fuel: "Petrol", trans: "Auto", daily: 10500 },
+            { id: 35, name: "Lexus LX 600", sub: "2024 • Ultra Luxury", cls: "SUV", emoji: "🍁", img: "https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?w=600&h=280&fit=crop&q=80", seats: 7, fuel: "Petrol", trans: "Auto", daily: 9200 },
+            { id: 36, name: "Audi e-tron GT", sub: "2024 • RS Quattro", cls: "Electric", emoji: "🌩️", img: "https://images.pexels.com/photos/9452202/pexels-photo-9452202.jpeg", seats: 5, fuel: "Electric", trans: "Auto", daily: 7400 },
+            { id: 37, name: "Volvo XC90 Recharge", sub: "2024 • Ultimate", cls: "SUV", emoji: "❄️", img: "https://images.unsplash.com/photo-1612544448445-b8232cff3b6c?w=600&h=280&fit=crop&q=80", seats: 7, fuel: "Hybrid", trans: "Auto", daily: 5200 },
+            { id: 38, name: "Genesis G90", sub: "2024 • 3.5T AWD", cls: "Luxury", emoji: "🌙", img: "https://images.pexels.com/photos/12506835/pexels-photo-12506835.jpeg", seats: 5, fuel: "Petrol", trans: "Auto", daily: 6800 },
+            { id: 39, name: "Skoda Octavia RS", sub: "2024 • RS 245", cls: "Sedan", emoji: "🎯", img: "https://images.unsplash.com/photo-1541899481282-d53bffe3c35d?w=600&h=280&fit=crop&q=80", seats: 5, fuel: "Petrol", trans: "Auto", daily: 2200 },
+            { id: 40, name: "Porsche Taycan", sub: "2024 • Turbo S Cross Turismo", cls: "Electric", emoji: "⚡", img: "https://images.pexels.com/photos/35849577/pexels-photo-35849577.jpeg", seats: 5, fuel: "Electric", trans: "Auto", daily: 11500 },
+            { id: 41, name: "Ferrari Roma", sub: "2024 • V8 GT", cls: "Sport", emoji: "🌹", img: "https://images.unsplash.com/photo-1583121274602-3e2820c69888?w=600&h=280&fit=crop&q=80", seats: 2, fuel: "Petrol", trans: "Auto", daily: 21000 },
+            { id: 42, name: "Rolls-Royce Cullinan", sub: "2024 • Black Badge", cls: "SUV", emoji: "🖤", img: "https://images.unsplash.com/photo-1632245889029-e406faaa34cd?w=600&h=280&fit=crop&q=80", seats: 5, fuel: "Petrol", trans: "Auto", daily: 35000 },
+            { id: 43, name: "Hyundai Ioniq 6", sub: "2024 • AWD Premium", cls: "Electric", emoji: "🔵", img: "https://images.pexels.com/photos/33125984/pexels-photo-33125984.jpeg", seats: 5, fuel: "Electric", trans: "Auto", daily: 3200 },
+            { id: 44, name: "Toyota GR Supra", sub: "2024 • A90 3.0T", cls: "Sport", emoji: "🟡", img: "https://images.pexels.com/photos/10978972/pexels-photo-10978972.jpeg", seats: 2, fuel: "Petrol", trans: "Auto", daily: 7800 },
+            { id: 45, name: "Audi Q8 e-tron", sub: "2024 • S-Line Quattro", cls: "SUV", emoji: "🔷", img: "https://images.unsplash.com/photo-1563720223185-11003d516935?w=600&h=280&fit=crop&q=80", seats: 5, fuel: "Electric", trans: "Auto", daily: 6400 },
+            { id: 46, name: "Mercedes AMG GT", sub: "2024 • 63 S 4-Door", cls: "Sport", emoji: "⭐", img: "https://images.unsplash.com/photo-1609521263047-f8f205293f24?w=600&h=280&fit=crop&q=80", seats: 4, fuel: "Petrol", trans: "Auto", daily: 14500 },
+            { id: 47, name: "Maruti Swift", sub: "2024 • ZXi Plus AMT", cls: "Sedan", emoji: "🌈", img: "https://images.unsplash.com/photo-1541899481282-d53bffe3c35d?w=600&h=280&fit=crop&q=80", seats: 5, fuel: "Petrol", trans: "Auto", daily: 900 },
+            { id: 48, name: "Lamborghini Revuelto", sub: "2024 • V12 Hybrid", cls: "Sport", emoji: "🌋", img: "https://images.unsplash.com/photo-1526726538690-5cbf956ae2fd?w=600&h=280&fit=crop&q=80", seats: 2, fuel: "Hybrid", trans: "Auto", daily: 55000 },
+        ];
+
+        const S = {
+            get: (k) => { try { return JSON.parse(localStorage.getItem(k) || 'null') } catch { return null } },
+            set: (k, v) => localStorage.setItem(k, JSON.stringify(v)),
+            getBookedIds: () => S.get('veloce_booked_ids') || [],
+            setBookedIds: (ids) => S.set('veloce_booked_ids', ids),
+            getBookings: () => S.get('veloce_bookings') || [],
+            setBookings: (b) => S.set('veloce_bookings', b),
+            addBooking: (b) => { const l = S.getBookings(); l.unshift(b); S.setBookings(l); },
+            cancelBooking: (id) => {
+                const l = S.getBookings().map(b => b.id === id ? { ...b, status: 'cancelled' } : b);
+                S.setBookings(l);
+                const b = l.find(b => b.id === id);
+                if (b) { const ids = S.getBookedIds().filter(i => i !== b.carId); S.setBookedIds(ids); }
+            },
+            isAvailable: (id) => !S.getBookedIds().includes(id),
+            markBooked: (id) => { const ids = S.getBookedIds(); if (!ids.includes(id)) { ids.push(id); S.setBookedIds(ids); } },
+            getProfile: () => S.get('veloce_profile') || {},
+            setProfile: (p) => S.set('veloce_profile', p),
+            getTheme: () => S.get('veloce_theme') || 'dark',
+            setTheme: (t) => S.set('veloce_theme', t),
+        };
+
+        function applyTheme() { const t = S.getTheme(); document.body.classList.toggle('light', t === 'light'); const btn = document.getElementById('themeBtn'); if (btn) btn.textContent = t === 'light' ? '🌙' : '☀️'; }
+        function toggleTheme() { const t = S.getTheme() === 'dark' ? 'light' : 'dark'; S.setTheme(t); applyTheme(); }
+        applyTheme();
+
+        const fmt = (n) => '₹' + Number(n).toLocaleString('en-IN');
+
+        document.body.insertAdjacentHTML('beforeend', `
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <h3 id="modalTitle">BOOK YOUR CAR</h3>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-car-banner" id="modalBanner"></div>
+
+      <!-- ✅ Booking form: action="/cars" method="POST" -->
+      <form action="/booking" method="POST" autocomplete="off" >
+        <div class="form-row">
+          <div class="form-group"><label>Your Name</label><input type="text" id="bookName" name="name" placeholder="Enter your name" required></div>
+          <div class="form-group">
+
+          <label>Phone</label>
+
+          <input type="tel"
+                 id="bookPhone"
+                 name="phone"
+                 placeholder="Enter phone number"
+                 maxlength="10"
+                 pattern="[6789][0-9]{9}"
+                 inputmode="numeric"
+                 required
+                 oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+
+      </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Pick-up Date</label><input type="date" id="bookStart" name="pickupDate" oninput="calcPrice()" required></div>
+          <div class="form-group"><label>Return Date</label><input type="date" id="bookEnd" name="returnDate" oninput="calcPrice()" required></div>
+        </div>
+        <div class="form-group">
+          <label>Rental Duration</label>
+          <div class="dur-tabs">
+            <div class="dur-tab active" data-dur="daily" onclick="selectDur(this)"><span class="d-label">Daily</span><span class="d-price" id="dur-daily">₹0</span><span class="d-save"></span></div>
+            <div class="dur-tab" data-dur="weekly" onclick="selectDur(this)"><span class="d-label">Weekly</span><span class="d-price" id="dur-weekly">₹0</span><span class="d-save" id="dur-weekly-save"></span></div>
+            <div class="dur-tab" data-dur="monthly" onclick="selectDur(this)"><span class="d-label">Monthly</span><span class="d-price" id="dur-monthly">₹0</span><span class="d-save" id="dur-monthly-save"></span></div>
+          </div>
+          <input type="hidden" id="bookDur" name="duration" value="daily">
+        </div>
+        <div class="form-group">
+          <label>Pick-up Location</label>
+          <select id="bookLocation" name="pickupLocation" required>
+            <option>Hyderabad — Jubilee Hills Hub</option>
+            <option>Hyderabad — Banjara Hills Centre</option>
+            <option>Hyderabad — HITEC City Point</option>
+            <option>Hyderabad — Airport Lounge</option>
+          </select>
+        </div>
+        <input type="hidden" id="bookCarId" name="car_id" value="">
+        <div class="price-summary">
+          <div class="price-row"><span>Daily Rate</span><span id="sumRate">—</span></div>
+          <div class="price-row"><span>Duration</span><span id="sumDays">—</span></div>
+          <div class="price-row"><span>Insurance</span><span>Included ✅</span></div>
+          <div class="price-row total"><span>Total</span><span class="amount" id="sumTotal">₹0</span></div>
+        </div>
+        <input type="hidden" id="bookTotal" name="price" value="0">
+        <button type="submit" class="btn btn-red" style="width:100%;padding:13px">🚀 Confirm Booking</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="profileModalOverlay">
+  <div class="modal" onclick="event.stopPropagation()" style="width:440px">
+    <div class="modal-header"><h3>EDIT PROFILE</h3><button class="modal-close" onclick="closeProfileModal()">✕</button></div>
+    <div class="modal-body">
+      <div style="display:flex;flex-direction:column;align-items:center;margin-bottom:24px">
+        <div class="profile-avatar-xl" id="profileAvatarXl">JD</div>
+        <button type="button" class="btn btn-outline" style="margin-top:10px;font-size:.72rem;padding:7px 14px" onclick="cycleAvatarColor()">Change Colour</button>
+      </div>
+      <!-- ✅ Profile form: action="/profile/update" method="POST" -->
+      <form action="/profile/update" method="POST" id="profileForm" onsubmit="event.preventDefault();saveProfile()">
+        <div class="form-row">
+          <div class="form-group"><label>First Name</label><input type="text" id="pFirstName" name="first_name" required></div>
+          <div class="form-group"><label>Last Name</label><input type="text" id="pLastName" name="last_name" required></div>
+        </div>
+        <div class="form-group"><label>Email</label><input type="email" id="pEmail" name="email" required></div>
+        <div class="form-group"><label>Phone</label><input type="tel" id="pPhone" name="phone"></div>
+        <div class="form-group"><label>City</label>
+          <select id="pCity" name="city"><option>Hyderabad</option><option>Mumbai</option><option>Delhi</option><option>Bangalore</option><option>Chennai</option></select>
+        </div>
+        <button type="submit" class="btn btn-red" style="width:100%;padding:13px;margin-top:4px">Save Changes</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div class="signup-overlay" id="signupOverlay">
+  <div class="signup-box" onclick="event.stopPropagation()">
+    <div class="signup-top">
+      <button class="signup-close" onclick="closeSignup()">✕</button>
+      <div class="signup-logo">VELO<span>CE</span></div>
+      <div class="signup-tagline">Premium Car Rentals · Hyderabad</div>
+    </div>
+    <div class="signup-body">
+      <div class="signup-tabs">
+        <button class="stab active" id="stab-signup" onclick="switchAuthTab('signup')">Create Account</button>
+        <button class="stab" id="stab-login" onclick="switchAuthTab('login')">Sign In</button>
+      </div>
+
+      <div class="signup-panel active" id="panel-signup">
+        <!-- ✅ Register form: action="/auth/register" method="POST" -->
+        <form action="/auth/register" method="POST" id="signupForm" onsubmit="event.preventDefault();handleSignup()">
+          <div class="form-row">
+            <div class="form-group"><label>First Name</label><div class="input-icon-wrap"><span class="i-icon">👤</span><input type="text" id="su-first" name="first_name" placeholder="Arjun" required></div></div>
+            <div class="form-group"><label>Last Name</label><input type="text" id="su-last" name="last_name" placeholder="Reddy" required></div>
+          </div>
+          <div class="form-group"><label>Email</label><div class="input-icon-wrap"><span class="i-icon">✉️</span><input type="email" id="su-email" name="email" placeholder="you@email.com" required></div></div>
+          <div class="form-group"><label>Phone</label><div class="input-icon-wrap"><span class="i-icon">📱</span><input type="tel" id="su-phone" name="phone" placeholder="+91 98765 43210"></div></div>
+          <div class="form-group"><label>Password</label><div class="input-icon-wrap"><span class="i-icon">🔒</span><input type="password" id="su-pass" name="password" placeholder="Min. 8 characters" oninput="checkStrength(this.value)" required></div><div class="strength-bar"><div class="strength-fill" id="strengthFill"></div></div><div class="strength-label" id="strengthLabel"></div></div>
+          <div class="form-group"><label>Confirm Password</label><div class="input-icon-wrap"><span class="i-icon">🔒</span><input type="password" id="su-pass2" name="confirm_password" placeholder="Repeat password" required></div></div>
+          <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:18px"><input type="checkbox" id="su-terms" name="terms" style="margin-top:3px;accent-color:var(--red)"><label for="su-terms" style="font-size:.76rem;color:var(--gray);cursor:pointer;line-height:1.5">I agree to the <a href="#" style="color:var(--red)">Terms of Service</a> and <a href="#" style="color:var(--red)">Privacy Policy</a></label></div>
+          <button type="submit" class="btn btn-red" style="width:100%;padding:12px">🚀 Create My Account</button>
+        </form>
+        <div class="signup-divider"><span>or</span></div>
+        <button class="social-btn" onclick="showToast('⚠️ Connect Firebase to enable Google Sign-In.','warn')"><svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.29-8.16 2.29-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>Continue with Google</button>
+        <div class="signup-footer">Already have an account? <a onclick="switchAuthTab('login')">Sign in →</a></div>
+      </div>
+
+      <div class="signup-panel" id="panel-login">
+        <!-- ✅ Login form: action="/auth/login" method="POST" -->
+        <form action="/auth/login" method="POST" id="loginForm" onsubmit="event.preventDefault();handleLogin()">
+          <div class="form-group"><label>Email</label><div class="input-icon-wrap"><span class="i-icon">✉️</span><input type="email" id="li-email" name="email" placeholder="you@email.com" required></div></div>
+          <div class="form-group"><label>Password</label><div class="input-icon-wrap"><span class="i-icon">🔒</span><input type="password" id="li-pass" name="password" placeholder="Your password" required></div></div>
+          <div style="display:flex;justify-content:flex-end;margin-bottom:18px"><a style="font-size:.76rem;color:var(--red);cursor:pointer">Forgot password?</a></div>
+          <button type="submit" class="btn btn-red" style="width:100%;padding:12px">🔑 Sign In to Veloce</button>
+        </form>
+        <div class="signup-divider"><span>or</span></div>
+        <button class="social-btn" onclick="showToast('⚠️ Connect Firebase to enable Google Sign-In.','warn')"><svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.29-8.16 2.29-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>Continue with Google</button>
+        <div class="signup-footer">Don't have an account? <a onclick="switchAuthTab('signup')">Create one →</a></div>
+      </div>
+
+      <div class="signup-panel" id="panel-success">
+        <div class="signup-success"><div class="s-icon">🎉</div><h3>WELCOME TO VELOCE!</h3><p id="successMsg">Your account is ready.</p><button class="btn btn-red" style="margin-top:22px;padding:11px 32px" onclick="closeSignup()">Start Exploring →</button></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="profile-menu" id="profileMenu">
+  <div class="profile-menu-header">
+  
+  <div class="profile-avatar-lg" id="pmAvatar">JD</div>
+  <div><div class="profile-fullname" id="pmName">John Doe</div><div class="profile-email" id="pmEmail">johndoe@email.com</div><div class="profile-badge">Premium Member</div></div>
+
+	    
+  </div>
+  <div class="profile-menu-stats">
+    <div class="pm-stat"><div class="pm-val" id="pm-bookings">0</div><div class="pm-lbl">Bookings</div></div>
+    <div class="pm-stat"><div class="pm-val" id="pm-spent">₹0</div><div class="pm-lbl">Spent</div></div>
+    <div class="pm-stat"><div class="pm-val">Gold</div><div class="pm-lbl">Tier</div></div>
+  </div>
+  <div class="profile-menu-items">
+    <div class="pm-item" onclick="location.href='/mybooking'">📋 My Bookings</div>
+    <div class="pm-item" onclick="location.href='/availability'">🔍 Check Availability</div>
+    <div class="pm-item" onclick="openEditProfile()">✏️ Edit Profile</div>
+    <a href="/signin"><div class="pm-item pm-logout" onclick="signOut()">🚪 Sign Out</div></a>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+`);
+
+        document.getElementById('modalOverlay').addEventListener('click', e => { if (e.target === e.currentTarget) closeModal(); });
+        document.getElementById('profileModalOverlay').addEventListener('click', e => { if (e.target === e.currentTarget) closeProfileModal(); });
+        document.getElementById('signupOverlay').addEventListener('click', e => { if (e.target === e.currentTarget) closeSignup(); });
+
+        const AVATAR_COLORS = ['linear-gradient(135deg,#e63030,#a00)', 'linear-gradient(135deg,#c9a84c,#8a6f2e)', 'linear-gradient(135deg,#2ecc71,#1a8a4a)', 'linear-gradient(135deg,#3498db,#1a5a8a)', 'linear-gradient(135deg,#9b59b6,#5a2d82)'];
+        let _avatarIdx = 0;
+        let profile = Object.assign({ first: 'John', last: 'Doe', email: 'johndoe@email.com', phone: '+91 9999999999', city: 'Hyderabad' }, S.getProfile());
+        const getIni = () => ((profile.first || 'J')[0] + (profile.last || 'D')[0]).toUpperCase();
+
+        function updateProfileUI() {
+            const ini = getIni();
+            ['headerProfileCircle', 'pmAvatar', 'profileAvatarXl'].forEach(id => { const el = document.getElementById(id); if (el) el.textContent = ini; });
+            const pn = document.getElementById('pmName'); if (pn) pn.textContent = profile.first + ' ' + profile.last;
+            const pe = document.getElementById('pmEmail'); if (pe) pe.textContent = profile.email;
+            const bookings = S.getBookings().filter(b => b.status !== 'cancelled');
+            const bc = document.getElementById('pm-bookings'); if (bc) bc.textContent = bookings.length;
+            const sp = bookings.reduce((a, b) => a + (b.total || 0), 0);
+            const bs = document.getElementById('pm-spent'); if (bs) bs.textContent = fmt(sp);
+            const circle = document.getElementById('headerProfileCircle');
+            if (circle && !circle.querySelector('.profile-online')) { const dot = document.createElement('div'); dot.className = 'profile-online'; circle.appendChild(dot); }
+        }
+
+        function toggleProfileMenu() { updateProfileUI(); document.getElementById('profileMenu').classList.toggle('open'); }
+        function closeProfileMenu() { document.getElementById('profileMenu').classList.remove('open'); }
+        document.addEventListener('click', e => {
+            const m = document.getElementById('profileMenu');
+            if (m && m.classList.contains('open') && !m.contains(e.target) && !e.target.closest('#headerProfileCircle')) closeProfileMenu();
+        });
+        function openEditProfile() { closeProfileMenu(); document.getElementById('pFirstName').value = profile.first; document.getElementById('pLastName').value = profile.last; document.getElementById('pEmail').value = profile.email; document.getElementById('pPhone').value = profile.phone; document.getElementById('pCity').value = profile.city || 'Hyderabad'; const pax = document.getElementById('profileAvatarXl'); pax.textContent = getIni(); pax.style.background = AVATAR_COLORS[_avatarIdx]; document.getElementById('profileModalOverlay').classList.add('open'); }
+        function closeProfileModal() { document.getElementById('profileModalOverlay').classList.remove('open'); }
+        function cycleAvatarColor() { _avatarIdx = (_avatarIdx + 1) % AVATAR_COLORS.length; document.getElementById('profileAvatarXl').style.background = AVATAR_COLORS[_avatarIdx]; }
+        function saveProfile() { profile.first = document.getElementById('pFirstName').value.trim() || profile.first; profile.last = document.getElementById('pLastName').value.trim() || profile.last; profile.email = document.getElementById('pEmail').value.trim() || profile.email; profile.phone = document.getElementById('pPhone').value.trim() || profile.phone; profile.city = document.getElementById('pCity').value; S.setProfile(profile); updateProfileUI(); closeProfileModal(); showToast('✅ Profile updated!'); }
+        function signOut() { profile = { first: 'Guest', last: '', email: '', phone: '', city: 'Hyderabad' }; S.setProfile(profile); updateProfileUI(); closeProfileMenu(); showToast('👋 Signed out. See you soon!'); }
+
+        function openSignup() { switchAuthTab('signup'); document.getElementById('signupOverlay').classList.add('open'); }
+        function closeSignup() { document.getElementById('signupOverlay').classList.remove('open'); }
+        function switchAuthTab(tab) { document.querySelectorAll('.stab').forEach(b => b.classList.remove('active')); document.querySelectorAll('.signup-panel').forEach(p => p.classList.remove('active')); const tb = document.getElementById('stab-' + tab); if (tb) tb.classList.add('active'); const pn = document.getElementById('panel-' + tab); if (pn) pn.classList.add('active'); }
+        function checkStrength(v) { let s = 0; if (v.length >= 8) s++; if (/[A-Z]/.test(v)) s++; if (/[0-9]/.test(v)) s++; if (/[^A-Za-z0-9]/.test(v)) s++; const c = ['', '#e63030', '#f39c12', '#2ecc71', '#2ecc71']; const l = ['', 'Weak', 'Fair', 'Good', 'Strong']; const f = document.getElementById('strengthFill'); const lb = document.getElementById('strengthLabel'); f.style.width = (s * 25) + '%'; f.style.background = c[s]; lb.textContent = l[s]; lb.style.color = c[s]; }
+        function handleSignup() { const f = document.getElementById('su-first').value.trim(), l = document.getElementById('su-last').value.trim(), e = document.getElementById('su-email').value.trim(), p = document.getElementById('su-pass').value, p2 = document.getElementById('su-pass2').value, t = document.getElementById('su-terms').checked; if (!f || !l || !e) { showToast('⚠️ Please fill all fields.', 'warn'); return; } if (!e.includes('@')) { showToast('⚠️ Enter a valid email.', 'warn'); return; } if (p.length < 8) { showToast('⚠️ Password min 8 chars.', 'warn'); return; } if (p !== p2) { showToast('⚠️ Passwords do not match.', 'warn'); return; } if (!t) { showToast('⚠️ Accept the Terms.', 'warn'); return; } profile.first = f; profile.last = l; profile.email = e; S.setProfile(profile); updateProfileUI(); document.getElementById('successMsg').textContent = 'Welcome, ' + f + '! Start exploring our fleet.'; switchAuthTab('success'); showToast('🎉 Welcome to Veloce, ' + f + '!'); }
+        function handleLogin() { const e = document.getElementById('li-email').value.trim(), p = document.getElementById('li-pass').value; if (!e || !p) { showToast('⚠️ Enter email and password.', 'warn'); return; } document.getElementById('successMsg').textContent = "Welcome back! You're now signed in."; switchAuthTab('success'); showToast('👋 Welcome back!'); }
+
+        let _car = null, _dur = 'daily';
+        function openBooking(carId) {
+            const car = CARS.find(c => c.id === carId);
+            if (!car || !S.isAvailable(car.id)) { showToast('❌ Car not available.', 'error'); return; }
+            _car = car; _dur = 'daily';
+            document.getElementById('modalTitle').textContent = 'BOOK — ' + car.name.toUpperCase();
+            const banner = document.getElementById('modalBanner');
+            banner.innerHTML = `<img src="${car.img}" alt="${car.name}" style="width:100%;height:100%;object-fit:cover" onerror="this.parentElement.innerHTML='<div style=display:flex;align-items:center;justify-content:center;height:140px;font-size:5rem>${car.emoji}</div>'"><div class="banner-info"><span style="font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:2px">${car.name}</span> <span style="font-size:.75rem;color:var(--gray)">· ${car.cls}</span></div>`;
+            const wd = Math.round(car.daily * 7 * .9), md = Math.round(car.daily * 30 * .75);
+            document.getElementById('dur-daily').textContent = fmt(car.daily);
+            document.getElementById('dur-weekly').textContent = fmt(wd);
+            document.getElementById('dur-weekly-save').textContent = 'Save 10%';
+            document.getElementById('dur-monthly').textContent = fmt(md);
+            document.getElementById('dur-monthly-save').textContent = 'Save 25%';
+            document.querySelectorAll('.dur-tab').forEach(d => d.classList.remove('active'));
+            document.querySelector('.dur-tab[data-dur="daily"]').classList.add('active');
+            document.getElementById('sumRate').textContent = fmt(car.daily) + '/day';
+            document.getElementById('sumDays').textContent = '—';
+            document.getElementById('sumTotal').textContent = fmt(car.daily);
+            document.getElementById('bookCarId').value = car.id;
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('bookStart').value = today;
+            document.getElementById('bookEnd').value = '';
+            document.getElementById('bookName').value = profile.first !== 'Guest' ? profile.first + ' ' + profile.last : '';
+            document.getElementById('bookPhone').value = profile.phone || '';
+            document.getElementById('bookDur').value = 'daily';
+            document.getElementById('modalOverlay').classList.add('open');
+        }
+        function closeModal() { document.getElementById('modalOverlay').classList.remove('open'); }
+
+        function selectDur(el) {
+            document.querySelectorAll('.dur-tab').forEach(d => d.classList.remove('active'));
+            el.classList.add('active'); _dur = el.dataset.dur;
+            document.getElementById('bookDur').value = _dur;
+            const si = document.getElementById('bookStart');
+            const ei = document.getElementById('bookEnd');
+            if (_dur === 'weekly') { const s = new Date(si.value || new Date()); const e = new Date(s); e.setDate(e.getDate() + 7); ei.value = e.toISOString().split('T')[0]; }
+            else if (_dur === 'monthly') { const s = new Date(si.value || new Date()); const e = new Date(s); e.setDate(e.getDate() + 30); ei.value = e.toISOString().split('T')[0]; }
+            calcPrice();
+        }
+
+        function calcPrice() {
+            if (!_car) return;
+            const s = document.getElementById('bookStart').value, e = document.getElementById('bookEnd').value;
+            let total = _car.daily, days = '—';
+            if (_dur === 'daily') { if (s && e) { const d = Math.max(1, Math.round((new Date(e) - new Date(s)) / 86400000)); days = d + (d === 1 ? ' day' : ' days'); total = _car.daily * d; } }
+            else if (_dur === 'weekly') { days = '7 days (Weekly)'; total = Math.round(_car.daily * 7 * .9); }
+            else if (_dur === 'monthly') { days = '30 days (Monthly)'; total = Math.round(_car.daily * 30 * .75); }
+            document.getElementById('sumDays').textContent = days;
+            document.getElementById('sumTotal').textContent = fmt(total);
+            document.getElementById('bookTotal').value = total;
+        }
+
+        function confirmBooking() {
+            const name = document.getElementById('bookName').value.trim();
+            const phone = document.getElementById('bookPhone').value.trim();
+            const start = document.getElementById('bookStart').value;
+            const end = document.getElementById('bookEnd').value;
+            const loc = document.getElementById('bookLocation').value;
+            if (!name || !start || !end) { showToast('⚠️ Please fill all required fields.', 'warn'); return; }
+            if (new Date(end) <= new Date(start)) { showToast('⚠️ Return date must be after pick-up.', 'warn'); return; }
+            const days = Math.max(1, Math.round((new Date(end) - new Date(start)) / 86400000));
+            let total = _car.daily * days;
+            if (_dur === 'weekly') total = Math.round(_car.daily * 7 * .9);
+            if (_dur === 'monthly') total = Math.round(_car.daily * 30 * .75);
+            const booking = { id: 'VLC' + Date.now().toString().slice(-6), carId: _car.id, carName: _car.name, carEmoji: _car.emoji, carImg: _car.img, carCls: _car.cls, name, phone, start, end, days, total, loc, status: 'upcoming', bookedOn: new Date().toLocaleDateString('en-IN'), duration: _dur };
+            S.addBooking(booking);
+            S.markBooked(_car.id);
+            closeModal();
+            showToast('🚀 Booking ' + booking.id + ' confirmed!');
+            if (typeof refreshPage === 'function') refreshPage();
+        }
+
+        function showToast(msg, type = '') {
+            const t = document.getElementById('toast'); if (!t) return;
+            t.textContent = msg; t.className = 'toast show ' + (type || '');
+            clearTimeout(t._t); t._t = setTimeout(() => t.classList.remove('show'), 3500);
+        }
+
+        function subscribeNewsletter() { const el = document.getElementById('nlEmail'); if (!el) return; const e = el.value.trim(); if (!e || !e.includes('@')) { showToast('⚠️ Enter a valid email.', 'warn'); return; } el.value = ''; showToast('🎉 Subscribed! Welcome to Veloce updates.'); }
+
+        updateProfileUI();
+
+        let _activeFilter = 'all';
+
+        function buildCard(car) {
+            const avail = S.isAvailable(car.id);
+            const wd = Math.round(car.daily * 7 * .9), md = Math.round(car.daily * 30 * .75);
+            return `<div class="car-card" onclick="${avail ? 'openBooking(' + car.id + ')' : ''}">
+    <div class="car-img-wrap">
+      <img src="${car.img}" alt="${car.name}" class="car-real-img" loading="lazy"
+        onerror="this.style.display='none';this.parentElement.insertAdjacentHTML('afterbegin','<div style=display:flex;align-items:center;justify-content:center;height:190px;font-size:5rem>${car.emoji}</div>')">
+      <span class="badge ${avail ? 'available' : 'booked'}">${avail ? 'Available' : 'Booked'}</span>
+    </div>
+    <div class="car-info">
+      <div class="car-class">${car.cls}</div>
+      <div class="car-name">${car.name}</div>
+      <div class="car-sub">${car.sub}</div>
+      <div class="car-specs">
+        <div class="spec"><div class="spec-val">${car.seats}</div><div class="spec-lbl">Seats</div></div>
+        <div class="spec"><div class="spec-val">${car.fuel}</div><div class="spec-lbl">Fuel</div></div>
+        <div class="spec"><div class="spec-val">${car.trans.slice(0,4)}</div><div class="spec-lbl">Trans.</div></div>
+      </div>
+      <div class="car-pricing">
+        <div class="car-price-opt"><span class="p-label">Daily</span><span class="p-amount">${fmt(car.daily)}</span></div>
+        <div class="car-price-opt"><span class="p-label">Weekly</span><span class="p-amount">${fmt(wd)}</span><span class="p-save">-10%</span></div>
+        <div class="car-price-opt best"><span class="p-label">Monthly</span><span class="p-amount">${fmt(md)}</span><span class="p-save">-25%</span></div>
+      </div>
+      <div class="car-footer">
+        <div class="price-tag"><div class="price-amount">${fmt(car.daily)}</div><div class="price-unit">/day</div></div>
+        <button class="btn ${avail ? 'btn-red' : 'btn-outline'}" ${avail ? '' : 'disabled'} onclick="event.stopPropagation();${avail ? 'openBooking(' + car.id + ')' : ''}">${avail ? 'Book Now' : 'Unavailable'}</button>
+      </div>
+    </div>
+  </div>`;
+        }
+
+        function renderCars() {
+            const q = (document.getElementById('searchInput')?.value || '').toLowerCase();
+            const sort = document.getElementById('sortSelect')?.value || 'default';
+            let list = CARS.filter(c => {
+                const matchFilter = _activeFilter === 'all' || (_activeFilter === 'available' ? S.isAvailable(c.id) : c.cls === _activeFilter);
+                const matchSearch = !q || c.name.toLowerCase().includes(q) || c.cls.toLowerCase().includes(q) || c.fuel.toLowerCase().includes(q);
+                return matchFilter && matchSearch;
+            });
+            if (sort === 'price-asc') list = [...list].sort((a, b) => a.daily - b.daily);
+            else if (sort === 'price-desc') list = [...list].sort((a, b) => b.daily - a.daily);
+            else if (sort === 'name-asc') list = [...list].sort((a, b) => a.name.localeCompare(b.name));
+            const grid = document.getElementById('carGrid');
+            grid.innerHTML = list.length ? list.map(buildCard).join('') : '<div class="empty-state"><div class="icon">🔍</div><p>No vehicles match your search.</p></div>';
+            updateStats();
+        }
+
+        function filterCars(cat, btn) {
+            document.querySelectorAll('.filter-chip').forEach(b => b.classList.remove('active'));
+            if (btn) btn.classList.add('active');
+            _activeFilter = cat; renderCars();
+        }
+
+        function updateStats() {
+            const avail = CARS.filter(c => S.isAvailable(c.id)).length;
+            const myB = S.getBookings().filter(b => b.status !== 'cancelled').length;
+            const e1 = document.getElementById('stat-total'); if (e1) e1.textContent = CARS.length;
+            const e2 = document.getElementById('stat-avail'); if (e2) e2.textContent = avail;
+            const e3 = document.getElementById('stat-booked'); if (e3) e3.textContent = CARS.length - avail;
+            const e4 = document.getElementById('stat-mybookings'); if (e4) e4.textContent = myB;
+        }
+
+        function refreshPage() { renderCars(); }
+
+        (() => {
+            const p = new URLSearchParams(location.search).get('filter');
+            if (p) { _activeFilter = p; setTimeout(() => { document.querySelectorAll('.filter-chip').forEach(c => { if (c.dataset.filter === p) c.classList.add('active'); else c.classList.remove('active'); }); }, 50); }
+            renderCars();
+        })();
+        
+        
+        async function loadMyBookings() {
+
+            // ✅ fetch logged user bookings
+            const res =
+                await fetch('/api/bookings');
+
+            const bookings =
+                await res.json();
+
+            // ✅ set count
+            document.getElementById(
+                'stat-mybookings'
+            ).innerText = bookings.length;
+        }
+
+        // call function
+        loadMyBookings();
+
+    </script>
+</body>
+</html>
