@@ -11,6 +11,7 @@ public class CorsConfig {
     @Bean
     public WebMvcConfigurer corsConfigurer() {
         return new WebMvcConfigurer() {
+
             @Override
             public void addCorsMappings(CorsRegistry registry) {
 
@@ -20,7 +21,12 @@ public class CorsConfig {
                                 "http://127.0.0.1:5173",
                                 "http://localhost:3000",
                                 "http://127.0.0.1:3000",
-                                "https://driveease-frontend-ten.vercel.app"
+
+                                // Vercel production domain
+                                "https://driveease-frontend-ten.vercel.app",
+
+                                // Current Vercel deployment
+                                "https://driveease-frontend-jqiow8u6r-student-0e46.vercel.app"
                         )
                         .allowedMethods(
                                 "GET",
